@@ -24,6 +24,10 @@ git clone https://github.com/colirain/project1-jobweb.git
 ```
 pip -r requirements.txt
 ```
+5. exit environment
+```
+deactivate
+```
 
 ## Old instruct
 Install pip if needed
