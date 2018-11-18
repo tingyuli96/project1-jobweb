@@ -113,7 +113,6 @@ def index():
 
   See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
   """
-
   # DEBUG: this is debugging code to see what request looks like
   print request.args
 
