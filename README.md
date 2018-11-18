@@ -8,9 +8,11 @@ virtualenv
 ```pip install virtualenv```
 2. create folder and activate a virtual environment
 ```
-virtualenv -p python2.7 <projectname>
+mkdir <projectname>
 cd <projectname>
-source bin/activate
+mkdir env 
+virtualenv -p python2.7 env 
+source /env/bin/activate
 ```
 3. get code
 ```

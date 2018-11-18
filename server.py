@@ -19,10 +19,11 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response
+from flask_bootstrap import Bootstrap
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
-
+Bootstrap(app)
 
 
 # XXX: The Database URI should be in the format of:
@@ -112,7 +113,7 @@ def index():
 
   See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
   """
-
+"""
   # DEBUG: this is debugging code to see what request looks like
   print request.args
 
@@ -125,7 +126,7 @@ def index():
   for result in cursor:
     names.append(result['name'])  # can also be accessed using result[0]
   cursor.close()
-
+"""
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
   # pass data to a template and dynamically generate HTML based on the data
