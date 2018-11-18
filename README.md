@@ -1,9 +1,9 @@
 
-## install
-### requirement
+## Install
+### Requirement
 python2.7 
 virtualenv
-### set up
+### Set up
 1. install virtualenv 
 ```
 pip install virtualenv
