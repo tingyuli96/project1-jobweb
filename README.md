@@ -1,9 +1,9 @@
 
-##install
+## install
 ### requirement
-python2.7
+python2.7 \\
 virtualenv
-### method
+### set up
 1. install virtualenv 
 ```pip install virtualenv```
 2. create folder and activate a virtual environment
@@ -20,6 +20,8 @@ git clone https://github.com/colirain/project1-jobweb.git
 ```
 pip -r requirements.txt
 ```
+
+## Old instruct
 Install pip if needed
 
         sudo apt-get install python-pip
