@@ -61,13 +61,13 @@ engine = create_engine(DATABASEURI)
 class RegisterFormCandidate(FlaskForm):
     uid = IntegerField('uid',validators=[InputRequired(), NumberRange(min=1,max=1000)])
     username = StringField('username',validators=[InputRequired()])
-    password = PasswordField('password',validators=[InputRequired(), Length(min=8,max=80)])
+    password = PasswordField('password',validators=[InputRequired()])
     university = StringField('university')
-    skills = StringField('skills')
-    major = StringField('major')
-    city = StringField('city')
-    state = StringField('state')
-    country = StringField('country')
+#    skills = StringField('skills')
+#    major = StringField('major')
+#    city = StringField('city')
+#    state = StringField('state')
+#    country = StringField('country')
 
 class RegisterFormCompany(FlaskForm):
     uid = IntegerField('uid',validators=[InputRequired(), NumberRange(min=5001,max=6000)])
@@ -140,15 +140,23 @@ def login_can():
 
     return render_template('login_can.html')
 
-@app.route('/signup_candidate')
+@app.route('/signup_candidate', methods=['GET', 'POST'])
 def signup_candidate():
+    print 'imher-------'
     form = RegisterFormCandidate()
-
-    if form.validate_on_submit():
+#    if request.method == 'POST':
+    print '----------getdate--------------'
+    print 'uid:{}'.format(form.uid.data)
+#    if form.validate_on_submit():
+    if request.method == 'POST':
+        print '-----------valid form------------'
+        print 'add new user'
         newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
-        g.conn.execute(Candidate(newcandidate), uid = form.uid.data, name = form.username.data, password = form.password.data, university = form.university.data);
+#        newuid = form.uid.data
+        g.conn.execute(text(newcandidate), uid = form.uid.data, name = form.username.data, password = form.password.data, university = form.university.data);
         return redirect('/')
     return render_template('/signup_candidate.html', form=form)
+
 @app.route('/signup_company')
 def signup_company():
     form = RegisterFormCompany()
