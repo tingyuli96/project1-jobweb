@@ -22,7 +22,9 @@ Sign Up
     <label for="inputPassword" class="sr-only">Password</label>
     <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
     -->
-
+    {% if notvaliduser %}
+    <p>uid already used</p>
+    {% endif %}
     {{ wtf.form_field(form.uid) }}
     {{ wtf.form_field(form.username) }}
     {{ wtf.form_field(form.password) }}

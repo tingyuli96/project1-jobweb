@@ -75,6 +75,21 @@ class RegisterFormCompany(FlaskForm):
     password = PasswordField('password', validators=[InputRequired(), Length(min=8,max=80)])
     company = StringField('company', validators=[InputRequired()])
 
+def check_valid_uid(uid):
+    uidlist = []
+    cursor1 = g.conn.execute("select uid from candidate")
+    cursor2 = g.conn.execute("select uid from companyusers_affi")
+    for result in cursor1:
+        uidlist.append(result['uid'])
+    for result in cursor2:
+        uidlist.append(result['uid'])
+    cursor1.close()
+    cursor2.close()
+    if uid in uidlist:
+        return False
+    else:
+        return True
+
 @app.before_request
 def before_request():
     """
@@ -152,10 +167,18 @@ def signup_candidate():
         print '-----------valid form------------'
         print 'add new user'
         newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
-#        newuid = form.uid.data
-        g.conn.execute(text(newcandidate), uid = form.uid.data, name = form.username.data, password = form.password.data, university = form.university.data);
-        return redirect('/')
-    return render_template('/signup_candidate.html', form=form)
+        newuid = form.uid.data
+        newname = form.username.data
+        newpassword = form.password.data
+        newuniversity = form.university.data
+        flag = check_valid_uid(newuid)
+        if flag:
+            g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
+                           password = newpassword, university = newuniversity);
+            return redirect('/')
+        else:
+            return render_template('/signup_candidate.html', form=form, notvaliduser = True)
+    return render_template('/signup_candidate.html', form=form, validuser = False)
 
 @app.route('/signup_company')
 def signup_company():
