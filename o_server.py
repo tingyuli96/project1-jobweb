@@ -105,50 +105,91 @@ def teardown_request(exception):
 def index():
     return render_template('index.html')
 
-@app.route('/login_can', methods=['GET', 'POST'])
-def login_can():
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    print "hhhh"
     if request.method == 'POST':
         # Get Form Fields
-        uid = request.form.get('uid')
+        username = request.form.get('username')
         password = request.form.get('password')
-        print uid
+        print username
         print password
 
-        cursor = g.conn.execute("SELECT uid FROM candidate;")
+        # Create cursor
+        # cur = mysql.connection.cursor()
+
+        # # Get user by username
+        # result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
+        cursor = g.conn.execute("SELECT name FROM candidate;")
         l = []
         for row in cursor:
-            l.append(row['uid'])
-            print("uid:", row['uid'])
+            l.append(row['name'])
+            print("name:", row['name'])
+        print l
 
-        if int(uid) in l:
-            cursor = g.conn.execute("SELECT password FROM candidate where uid = %s;", uid)
+
+        # if result > 0:
+        #     # Get stored hash
+        #     data = cur.fetchone()
+        #     password = data['password']
+        if username in l:
+            cursor = g.conn.execute("SELECT password FROM candidate where name = %s;", l[0])
             m = []
             for row in cursor:
                 m.append(row['password'])
                 print("password:", row['password'])
+            # Compare Passwords
+            # if sha256_crypt.verify(password_candidate, password):
+            #     # Passed
+            #     session['logged_in'] = True
+            #     session['username'] = username
 
+            #     flash('You are now logged in', 'success')
             if m[0] == password:
                 return redirect(url_for('dashboard'))
             else:
-                error = 'Invalid login_can'
+                error = 'Invalid login'
                 return render_template('login_can.html', error=error)
             # Close connection
             cur.close()
         else:
-            error = 'Uid not found'
+            error = 'Username not found'
             return render_template('login_can.html', error=error)
 
-    return render_template('login_can.html')
+    return render_template('login.html')
+    # ----------------------------
+    # form = LoginForm()
+
+    # if form.validate_on_submit():
+    #     user = User.query.filter_by(username=form.username.data).first()
+    #     if user:
+    #         if check_password_hash(user.password, form.password.data):
+    #             login_user(user, remember=form.remember.data)
+    #             return redirect(url_for('dashboard'))
+
+    #     return '<h1>Invalid username or password</h1>'
+    #     #return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
+
+    # return render_template('login.html', form=form)
+
+"""
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
+"""
 
 @app.route('/signup_candidate')
 def signup_candidate():
     form = RegisterFormCandidate()
-
+    print 'uid:{}'.format(form.uid.data)
+    print 'username:{}'.format(form.username.data)
     if form.validate_on_submit():
+        print 'add new user'
         newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
         g.conn.execute(Candidate(newcandidate), uid = form.uid.data, name = form.username.data, password = form.password.data, university = form.university.data);
         return redirect('/')
     return render_template('/signup_candidate.html', form=form)
+
 @app.route('/signup_company')
 def signup_company():
     form = RegisterFormCompany()
@@ -168,7 +209,7 @@ if __name__ == "__main__":
     @click.option('--debug', is_flag=True)
     @click.option('--threaded', is_flag=True)
     @click.argument('HOST', default='0.0.0.0')
-    @click.argument('PORT', default=5000, type=int)
+    @click.argument('PORT', default=8111, type=int)
     def run(debug, threaded, host, port):
         """
         This function handles command line parameters.
