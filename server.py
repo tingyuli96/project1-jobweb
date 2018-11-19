@@ -15,10 +15,15 @@ from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, url_for
 from flask_bootstrap import Bootstrap
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, IntegerField
+from wtforms.validators import InputRequired, Email, Length, NumberRange
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 # app = Flask(__name__, template_folder=tmpl_dir)
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'Idontknow'
 Bootstrap(app)
 
 # XXX: The Database URI should be in the format of:
@@ -53,8 +58,22 @@ engine = create_engine(DATABASEURI)
 #   name text
 # );""")
 # engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
+class RegisterFormCandidate(FlaskForm):
+    uid = IntegerField('uid',validators=[InputRequired(), NumberRange(min=1,max=1000)])
+    username = StringField('username',validators=[InputRequired()])
+    password = PasswordField('password',validators=[InputRequired(), Length(min=8,max=80)])
+    university = StringField('university')
+    skills = StringField('skills')
+    major = StringField('major')
+    city = StringField('city')
+    state = StringField('state')
+    country = StringField('country')
 
-
+class RegisterFormCompany(FlaskForm):
+    uid = IntegerField('uid',validators=[InputRequired(), NumberRange(min=5001,max=6000)])
+    username = StringField('username', validators=[InputRequired()])
+    password = PasswordField('password', validators=[InputRequired(), Length(min=8,max=80)])
+    company = StringField('company', validators=[InputRequired()])
 
 @app.before_request
 def before_request():
@@ -82,107 +101,6 @@ def teardown_request(exception):
     except Exception as e:
         pass
 
-
-#
-# @app.route is a decorator around index() that means:
-#   run index() whenever the user tries to access the "/" path using a GET request
-#
-# If you wanted the user to go to e.g., localhost:8111/foobar/ with POST or GET then you could use
-#
-#       @app.route("/foobar/", methods=["POST", "GET"])
-#
-# PROTIP: (the trailing / in the path is important)
-#
-# see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
-# see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
-#
-# @app.route('/')
-# def index():
-#   """
-#   request is a special object that Flask provides to access web request information:
-#   request.method:   "GET" or "POST"
-#   request.form:     if the browser submitted a form, this contains the data in the form
-#   request.args:     dictionary of URL arguments e.g., {a:1, b:2} for http://localhost?a=1&b=2
-#   See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
-#   """
-
-#   # DEBUG: this is debugging code to see what request looks like
-#   print request.args
-
-
-#   #
-#   # example of a database query
-#   #
-#   cursor = g.conn.execute("SELECT name FROM test")
-#   names = []
-#   for result in cursor:
-#     names.append(result['name'])  # can also be accessed using result[0]
-#   cursor.close()
-
-#   #
-#   # Flask uses Jinja templates, which is an extension to HTML where you can
-#   # pass data to a template and dynamically generate HTML based on the data
-#   # (you can think of it as simple PHP)
-#   # documentation: https://realpython.com/blog/python/primer-on-jinja-templating/
-#   #
-#   # You can see an example template in templates/index.html
-#   #
-#   # context are the variables that are passed to the template.
-#   # for example, "data" key in the context variable defined below will be
-#   # accessible as a variable in index.html:
-#   #
-#   #     # will print: [u'grace hopper', u'alan turing', u'ada lovelace']
-#   #     <div>{{data}}</div>
-#   #
-#   #     # creates a <div> tag for each element in data
-#   #     # will print:
-#   #     #
-#   #     #   <div>grace hopper</div>
-#   #     #   <div>alan turing</div>
-#   #     #   <div>ada lovelace</div>
-#   #     #
-#   #     {% for n in data %}
-#   #     <div>{{n}}</div>
-#   #     {% endfor %}
-#   #
-#   context = dict(data = names)
-
-
-#   #
-#   # render_template looks in the templates/ folder for files.
-#   # for example, the below file reads template/index.html
-#   #
-#   return render_template("index.html", **context)
-
-#
-# This is an example of a different path.  You can see it at
-#
-#     localhost:8111/another
-#
-# notice that the functio name is another() rather than index()
-# the functions for each app.route needs to have different names
-#
-# @app.route('/another')
-# def another():
-#   return render_template("anotherfile.html")
-
-
-# Example of adding new data to the database
-# @app.route('/add', methods=['POST'])
-# def add():
-#   name = request.form['name']
-#   print name
-#   cmd = 'INSERT INTO test(name) VALUES (:name1), (:name2)';
-#   g.conn.execute(text(cmd), name1 = name, name2 = name);
-#   return redirect('/')
-
-
-# @app.route('/login')
-# def login():
-#     abort(401)
-#     this_is_never_executed()
-
-#below is from open source template
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -258,6 +176,20 @@ def login():
 def signup():
     return render_template('signup.html')
 
+@app.route('/signup_candidate')
+def signup_candidate():
+    form = RegisterFormCandidate()
+
+    if form.validate_on_submit():
+        newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
+        g.conn.execute(Candidate(newcandidate), uid = form.uid.data, name = form.username.data, password = form.password.data, university = form.university.data);
+        return redirect('/')
+    return render_template('/signup_candidate.html', form=form)
+@app.route('/signup_company')
+def signup_company():
+    form = RegisterFormCompany()
+
+    return render_template('/signup_company.html', form=form)
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
