@@ -171,10 +171,11 @@ def login():
     #     #return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
 
     # return render_template('login.html', form=form)
-
+"""
 @app.route('/signup')
 def signup():
     return render_template('signup.html')
+"""
 
 @app.route('/signup_candidate')
 def signup_candidate():
