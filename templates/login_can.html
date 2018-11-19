@@ -1,7 +1,7 @@
 {% extends "bootstrap/base.html" %}
 
 {% block title %}
-Login
+Login_can
 {% endblock %}
 
 {% block styles %}
@@ -15,7 +15,7 @@ Login
       <form class="form-signin">
         <h2 class="form-signin-heading">Please sign in</h2>
         <label for="inputUsername" class="sr-only">Username</label>
-        <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" required autofocus>
+        <input type="text" id="inputUid" class="form-control" placeholder="Uid" name="uid" required autofocus>
         <label for="inputPassword" class="sr-only">Password</label>
         <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
         <button class="btn btn-lg btn-primary btn-block" type="submit" formmethod="post">Sign in</button>
