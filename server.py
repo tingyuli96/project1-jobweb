@@ -178,7 +178,7 @@ def signup_candidate():
             return redirect('/')
         else:
             return render_template('/signup_candidate.html', form=form, notvaliduser = True)
-    return render_template('/signup_candidate.html', form=form, validuser = False)
+    return render_template('/signup_candidate.html', form=form, notvaliduser = False)
 
 @app.route('/signup_company')
 def signup_company():
