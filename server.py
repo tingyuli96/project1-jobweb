@@ -136,7 +136,8 @@ def login_can():
             print("uid:", row['uid'])
 
         if int(uid) in l:
-            cursor = g.conn.execute("SELECT password FROM candidate where uid = %s;", uid)
+            t = text("SELECT password FROM candidate where uid = :newuid ;")
+            cursor = g.conn.execute(t, newuid=uid)
             m = []
             for row in cursor:
                 m.append(row['password'])
