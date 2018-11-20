@@ -13,13 +13,13 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, url_for
+from flask import Flask, request, render_template, g, redirect, Response, url_for, session
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, IntegerField
 from wtforms.validators import InputRequired, Email, Length, NumberRange
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from functools import wraps
 # tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 # app = Flask(__name__, template_folder=tmpl_dir)
 app = Flask(__name__)
@@ -58,6 +58,22 @@ engine = create_engine(DATABASEURI)
 #   name text
 # );""")
 # engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
+
+
+
+
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            #flash('hey yo login first')
+            return redirect(url_for('login_can')) 
+    return wrap
+
+
 class RegisterFormCandidate(FlaskForm):
     uid = IntegerField('uid',validators=[InputRequired(), NumberRange(min=1,max=1000)])
     username = StringField('username',validators=[InputRequired()])
@@ -120,6 +136,13 @@ def teardown_request(exception):
 def index():
     return render_template('index.html')
 
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
+
+#credit to https://github.com/realpython/discover-flas
 @app.route('/login_can', methods=['GET', 'POST'])
 def login_can():
     if request.method == 'POST':
@@ -144,9 +167,10 @@ def login_can():
                 print("password:", row['password'])
 
             if m[0] == password:
+                session['logged_in'] = True
                 return redirect(url_for('dashboard'))
             else:
-                error = 'Invalid login_can'
+                error = 'Invalid login_can. Please try again.'
                 return render_template('login_can.html', error=error)
             # Close connection
             cur.close()
@@ -155,6 +179,15 @@ def login_can():
             return render_template('login_can.html', error=error)
 
     return render_template('login_can.html')
+
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('index'))
+
+
+
 
 @app.route('/signup_candidate', methods=['GET', 'POST'])
 def signup_candidate():
@@ -186,9 +219,11 @@ def signup_company():
     form = RegisterFormCompany()
 
     return render_template('/signup_company.html', form=form)
-@app.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
+
+
+
+
+
 """
 if __name__ == '__main__':
     app.run(debug=True)
