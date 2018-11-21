@@ -15,9 +15,9 @@ from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, url_for, session
 from flask_bootstrap import Bootstrap
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, IntegerField
-from wtforms.validators import InputRequired, Email, Length, NumberRange
+from flask_wtf import FlaskForm, Form
+from wtforms import StringField, TextAreaField, PasswordField, SelectField, BooleanField, IntegerField
+from wtforms.validators import InputRequired,  DataRequired, Length, NumberRange
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 # tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -44,23 +44,10 @@ DB_SERVER = "w4111.cisxo09blonu.us-east-1.rds.amazonaws.com"
 
 DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/w4111"
 
-
 #
 # This line creates a database engine that knows how to connect to the URI above
 #
 engine = create_engine(DATABASEURI)
-
-
-# Here we create a test table and insert some values in it
-# engine.execute("""DROP TABLE IF EXISTS test;""")
-# engine.execute("""CREATE TABLE IF NOT EXISTS test (
-#   id serial,
-#   name text
-# );""")
-# engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
-
-
-
 
 
 def login_required(f):
@@ -70,28 +57,35 @@ def login_required(f):
             return f(*args, **kwargs)
         else:
             #flash('hey yo login first')
-            return redirect(url_for('login_can')) 
+            return redirect(url_for('login_can'))
     return wrap
 
 
 class RegisterFormCandidate(FlaskForm):
-    uid = IntegerField('uid',validators=[InputRequired(), NumberRange(min=1,max=1000)])
+    """candidate register"""
+    uid = IntegerField('uid',validators=[InputRequired()])
     username = StringField('username',validators=[InputRequired()])
     password = PasswordField('password',validators=[InputRequired()])
     university = StringField('university')
-#    skills = StringField('skills')
-#    major = StringField('major')
-#    city = StringField('city')
-#    state = StringField('state')
-#    country = StringField('country')
 
 class RegisterFormCompany(FlaskForm):
-    uid = IntegerField('uid',validators=[InputRequired(), NumberRange(min=5001,max=6000)])
+    """company user register"""
+    uid = IntegerField('uid',validators=[InputRequired()])
     username = StringField('username', validators=[InputRequired()])
-    password = PasswordField('password', validators=[InputRequired(), Length(min=8,max=80)])
-    company = StringField('company', validators=[InputRequired()])
+    password = PasswordField('password', validators=[InputRequired()])
+    cid = IntegerField('cid', validators=[InputRequired()])
 
-def check_valid_uid(uid):
+class AddFormCompany(FlaskForm):
+    """add company to database"""
+    cid = IntegerField('cid',validators=[InputRequired()])
+    name = StringField('name',validators=[InputRequired()])
+    size = SelectField('size',choices=[('1','1-10'),('2','10-50'),('3','50-100'),('4','100-250'),('5','250-1000'),('6','1000-5000'),('7','5000-10000'),('8','10000-25000'),('9','25000+')])
+    description = TextAreaField('description')
+
+def check_exist_uid(uid):
+    """
+    used in sign up, check whether the uid exist in database
+    """
     uidlist = []
     cursor1 = g.conn.execute("select uid from candidate")
     cursor2 = g.conn.execute("select uid from companyusers_affi")
@@ -102,9 +96,20 @@ def check_valid_uid(uid):
     cursor1.close()
     cursor2.close()
     if uid in uidlist:
-        return False
-    else:
         return True
+    else:
+        return False
+
+def check_exist_cid(cid):
+    cidlist = []
+    cursor = g.conn.execute("select cid from companyusers_affi")
+    for result in cursor:
+        cidlist.append(result['cid'])
+    cursor.close()
+    if cid in cidlist:
+        return True
+    else:
+        return False
 
 @app.before_request
 def before_request():
@@ -180,48 +185,109 @@ def login_can():
 
     return render_template('login_can.html')
 
+@app.route('/login_com')
 
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
     return redirect(url_for('index'))
 
-
-
-
 @app.route('/signup_candidate', methods=['GET', 'POST'])
 def signup_candidate():
-    print 'imher-------'
     form = RegisterFormCandidate()
-#    if request.method == 'POST':
-    print '----------getdate--------------'
     print 'uid:{}'.format(form.uid.data)
-#    if form.validate_on_submit():
-    if request.method == 'POST':
-        print '-----------valid form------------'
+    if form.validate_on_submit():
         print 'add new user'
         newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
         newuid = form.uid.data
         newname = form.username.data
         newpassword = form.password.data
         newuniversity = form.university.data
-        flag = check_valid_uid(newuid)
-        if flag:
+        flag = check_exist_uid(newuid)
+        if not flag:
             g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
                            password = newpassword, university = newuniversity);
-            return redirect('/')
+            return redirect(url_for('login_can'))
         else:
             return render_template('/signup_candidate.html', form=form, notvaliduser = True)
     return render_template('/signup_candidate.html', form=form, notvaliduser = False)
 
-@app.route('/signup_company')
+@app.route('/signup_company', methods=['GET','POST'])
 def signup_company():
     form = RegisterFormCompany()
+    print 'uid:{}'.format(form.uid.data)
+    print 'user:{}'.format(form.username.data)
+    print 'password:{}'.format(form.password.data)
+    print 'cid:{}'.format(form.cid.data)
+    # if request.method == 'POST':
+    if form.validate_on_submit():
+        print 'add new company user'
+        newuid = form.uid.data
+        newusername = form.username.data
+        newpassword = form.password.data
+        newcid = form.cid.data
+        newcompanyuser = "INSERT INTO companyusers_affi VALUES (:uid,:username,:password,:cid)";
+        flag1 = check_exist_uid(newuid)
+        flag2 = check_exist_cid(newcid)
+        if not flag1 and flag2:
+            print 'valid, add'
+            g.conn.execute(text(newcompanyuser), \
+                uid = newuid, \
+                username = newusername,\
+                password = newpassword, \
+                cid = newcid);
+            #------------------haven't change to url_for('login_com')---------------
+            return redirect("/") 
+        elif flag1:
+            print "not valid uid"
+            return render_template('/signup_company.html', form=form, notvaliduser = True, notvalidcid = False)
+        elif not flag2:
+            print "not valid cid"
+            return render_template('/signup_company.html', form=form, notvaliduser = False, notvalidcid = True)
+        else:
+            print "not valid unknow"
+            return render_template('/signup_company.html', form=form, notvaliduser = False, notvalidcid=False)
+    return render_template('/signup_company.html', form=form, notvaliduser = False, notvalidcid=False)
 
-    return render_template('/signup_company.html', form=form)
+# def signup_company():
+# #    form = RegisterFormCompany()
+#     if request.method == 'POST':
+#         print 'add new company user'
+#         newuid = request.form.get['uid']
+#         newusername = request.form.get['username']
+#         newpassword = request.form.get['password']
+#         newcid = request.form.get['cid']
+#         newcompanyuser = "INSERT INTO companyusers_affi VALUES (:uid,:username,:password,:company)"
+#         flag = check_valid_uid(newuid)
+#         if flag:
+#             g.conn.execute(text(newcompanyuser), uid = newuid, name = newname,\
+#                            password = newpassword, cid = newcid);
+#             cur = g.conn.execute("select * from companyusers_affi;")
+#             for i in cur:
+#                 print i
+#             return redirect("/")
+#         else:
+#             return render_template('/signup_company.html', notvaliduser = True)
+#     return render_template('/signup_company.html', notvaliduser = False)
 
-
-
+@app.route('/add_company', methods=['GET','POST'])
+def add_company():
+    """add company to database"""
+    form = AddFormCompany()
+    if form.validate_on_submit():
+        print 'add_company'
+        newcid = form.cid.data
+        newname = form.name.data
+        newsize = form.size.data
+        newdesciption = form.description.data
+        flag = check_exist_cid(newcid)
+        if not flag:
+            newcompany = "INSERT INTO company VALUES (:cid,:cname,:size,:description);"
+            g.conn.execute(text(newcompany),cid=newcid,cname=newname,size=newsize,description=newdesciption)
+            return redirect("/")
+        else:
+            return render_template('/add_company.html',form=form, notvalidcid=True)
+    return render_template('/add_company.html',form=form, notvalidcid=False)
 
 
 """

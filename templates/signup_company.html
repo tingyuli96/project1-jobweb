@@ -1,5 +1,5 @@
 {% extends "bootstrap/base.html" %}
-
+{% import "bootstrap/wtf.html" as wtf %}
 {% block title %}
 Sign Up
 {% endblock %}
@@ -7,20 +7,58 @@ Sign Up
 {% block styles %}
 {{super()}}
 <link rel="stylesheet" href="{{url_for('.static', filename='signin.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='starter-template.css')}}">
 {% endblock %}
 
 {% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Get Hired</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('login_can') }}">Candidate Login</a></li>
+            <li><a href="{{ url_for('signup_candidate') }}">Candidate Sign Up</a></li>
+            <li class="active"><a href="{{ url_for('signup_company')}}">CompanyUser Sign Up</a></li>
+            <li><a href="{{ url_for('add_company')}}">Add Company</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
 <div class="container">
 
-  <form class="form-signin">
+  <form class="form-signin" method="POST" action='/signup_company'>
     <h2 class="form-signin-heading">Sign Up</h2>
-    <label for="inputUsername" class="sr-only">Username</label>
-    <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
-    <label for="inputEmail" class="sr-only">Email address</label>
-    <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-    <label for="inputPassword" class="sr-only">Password</label>
-    <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign Up</button>
+<!--     
+    <label for="uid">UID</label>
+    <input type="number" name="uid" id="uid" class="form-control" placeholder="UID" required autofocus>
+    <label for="Username">Username</label>
+    <input type="text" name="username" id="Username" class="form-control" placeholder="Username" required autofocus>
+    <label for="inputPassword">Password</label>
+    <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required autofocus>
+    <label for="cid">CID</label>
+    <input type="number" name="cid" id="cid" class="form-control" placeholder="Company" requried> -->
+    {{ form.hidden_tag() }}
+    {% if notvaliduser %}
+    <p>uid already used</p>
+    {% endif %}
+    {{ wtf.form_field(form.uid) }}
+    {{ wtf.form_field(form.username) }}
+    {{ wtf.form_field(form.password) }}
+    {% if notvalidcid %}
+    <p>cid not exist</p>
+    <p><a href="/add_company">Go to add your company</a></p>
+    {% endif %}
+    {{ wtf.form_field(form.cid) }}
+    <button class="btn btn-lg btn-primary btn-block" type="submit" formmethod='POST'>Sign Up</button>
   </form>
 
 </div> <!-- /container -->

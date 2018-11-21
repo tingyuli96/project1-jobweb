@@ -1,7 +1,7 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 {% block title %}
-Sign Up
+Add Your Company
 {% endblock %}
 
 {% block styles %}
@@ -26,34 +26,26 @@ Sign Up
           <ul class="nav navbar-nav">
             <li><a href="/">Home</a></li>
             <li><a href="{{ url_for('login_can') }}">Candidate Login</a></li>
-            <li class="active"><a href="{{ url_for('signup_candidate') }}">Candidate Sign Up</a></li>
+            <li><a href="{{ url_for('signup_candidate') }}">Candidate Sign Up</a></li>
             <li><a href="{{ url_for('signup_company')}}">CompanyUser Sign Up</a></li>
-            <li><a href="{{ url_for('add_company')}}">Add Company</a></li>
+            <li class="active"><a href="{{ url_for('add_company')}}">Add Company</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
 <div class="container">
 
-  <form class="form-signin" method="POST" action='/signup_candidate'>
-    <h2 class="form-signin-heading">Candidate Sign Up</h2>
-    <!--
-    <label for="inputuid" class="sr-only">UID</label>
-    <input type="number" id="input`uid" class="form-control" placeholder="uid" required autofocus>
-    <label for="inputUsername" class="sr-only">Username</label>
-    <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
-    <label for="inputPassword" class="sr-only">Password</label>
-    <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-    -->
-    {% if notvaliduser %}
-    <p>uid already used</p>
-    {% endif %}
+  <form class="form-signin" method='POST' action="/add_company">
+    <h2 class="form-signin-heading">Add Company</h2>
     {{ form.hidden_tag() }}
-    {{ wtf.form_field(form.uid) }}
-    {{ wtf.form_field(form.username) }}
-    {{ wtf.form_field(form.password) }}
-    {{ wtf.form_field(form.university) }}
-    <button class="btn btn-lg btn-primary btn-block" type="submit" value="Go" formmethod='POST'>Sign Up</button>
+    {% if notvalidcid %}
+    <p>cid already used</p>
+    {% endif %}
+    {{ wtf.form_field(form.cid) }}
+    {{ wtf.form_field(form.name) }}
+    {{ wtf.form_field(form.size) }}
+    {{ wtf.form_field(form.description) }}
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Add Company</button>
   </form>
 
 </div> <!-- /container -->
