@@ -200,8 +200,43 @@ def dashboard_can(uid):
     for result in cursor:
         name = result['name']
         university = result['university']
+    cursor.close()
 
-    context = dict(name=name,university=university)
+    getSkill = "SELECT sname, proficiency FROM can_has_skills WHERE uid=:uid;"
+    cursor1 = g.conn.execute(text(getSkill),uid=uid)
+    skill_pro = ''
+    for result in cursor1:
+        skill_pro = skill_pro + result['sname']+": "
+        skill_pro = skill_pro + str(result['proficiency']) + ";\n"
+    cursor1.close()
+
+    getMajor = "SELECT * FROM can_has_major WHERE uid=:uid;"
+    cursor2 = g.conn.execute(text(getMajor),uid=uid)
+    maj = ''
+    for result in cursor2:
+        maj = maj + result['mname']+": "
+        maj = maj + result['level'] + "; "
+    cursor2.close()
+
+    
+    can_job = "select can_apply_pos.title, company.cname from can_apply_pos inner join company on can_apply_pos.cid = company.cid where can_apply_pos.uid = :uid;"
+    cursor3 = g.conn.execute(text(can_job),uid=uid)
+    job = ''
+    for result in cursor3:
+        job = job + result['cname']+": "
+        job = job + result['title'] + ";\n "
+    cursor3.close()
+
+    comm = "select * from can_expect_loc where uid = :uid;"
+    cursor4 = g.conn.execute(text(comm),uid=uid)
+    loc = ''
+    for result in cursor4:
+        loc = loc + result['city']+", "
+        loc = loc + result['state'] + ", "
+        loc = loc + result['country'] + ", "
+    cursor4.close()
+
+    context = dict(uid=uid, name=name,university=university,maj=maj, skill_pro=skill_pro,  loc=loc, job=job)
     return render_template('dashboard_can.html',**context)
 
 @app.route('/dashboard_com/<uid>')
