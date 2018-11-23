@@ -50,7 +50,7 @@ DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/w4111"
 engine = create_engine(DATABASEURI)
 
 
-def login_required(f):
+def login_required_can(f):
     @wraps(f)
     def wrap(*args, **kwargs):
         if 'logged_in' in session:
@@ -58,6 +58,16 @@ def login_required(f):
         else:
             #flash('hey yo login first')
             return redirect(url_for('login_can'))
+    return wrap
+
+def login_required_com(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            #flash('hey yo login first')
+            return redirect(url_for('login_com'))
     return wrap
 
 
@@ -183,7 +193,7 @@ def index():
 
 
 @app.route('/dashboard_can/<uid>')
-@login_required
+@login_required_can
 def dashboard_can(uid):
     getcandidate = "SELECT * FROM candidate WHERE uid=:uid;"
     cursor = g.conn.execute(text(getcandidate),uid=uid)
@@ -193,6 +203,33 @@ def dashboard_can(uid):
 
     context = dict(name=name,university=university)
     return render_template('dashboard_can.html',**context)
+
+@app.route('/dashboard_com/<uid>')
+@login_required_com
+def dashboard_com(uid):
+    getcompanyuser = "SELECT * FROM companyusers_affi WHERE uid=:uid;"
+    cursor1 = g.conn.execute(text(getcompanyuser),uid=uid)
+    for result in cursor1:
+        name = result['name']
+        cid = result['cid']
+    cursor1.close()
+    cursor2 = g.conn.execute("SELECT * from company WHERE cid = {};".format(cid))
+    sizedic=dict([('1','1-10'),('2','10-50'),('3','50-100'),('4','100-250'),('5','250-1000'),('6','1000-5000'),('7','5000-10000'),('8','10000-25000'),('9','25000+')])
+    for result in cursor2:
+        cname = result['cname']
+        size = sizedic[str(result['size'])]
+        description = result['description']
+    cursor2.close()
+    cursor3 = g.conn.execute("SELECT title, posttime FROM position_liein_post WHERE cid = {} and uid = {};".format(cid,uid))
+    jobs = []
+    for result in cursor3:
+        jobs.append(result)
+    cursor3.close()
+    context = dict(uid=uid, name=name,cid=cid,cname=cname,size=size,description=description,jobs=jobs)
+    return render_template('dashboard_com.html',**context)
+
+
+
 
 #credit to https://github.com/realpython/discover-flas
 @app.route('/login_can', methods=['GET', 'POST'])
@@ -259,7 +296,7 @@ def login_com():
 
             if m[0] == password:
                 session['logged_in'] = True
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('dashboard_com',uid=uid))
             else:
                 error = 'Invalid login_com. Please try again.'
                 return render_template('login_com.html', error=error)
@@ -270,12 +307,6 @@ def login_com():
             return render_template('login_com.html', error=error)
 
     return render_template('login_com.html')
-
-
-
-
-
-
 
 
 @app.route('/logout')
@@ -327,8 +358,7 @@ def signup_company():
                 username = newusername,\
                 password = newpassword, \
                 cid = newcid);
-            #------------------haven't change to url_for('login_com')---------------
-            return redirect("/") 
+            return redirect(url_for('login_com')) 
         elif flag1:
             print "not valid uid"
             return render_template('/signup_company.html', form=form, notvaliduser = True, notvalidcid = False)
