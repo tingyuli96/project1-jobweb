@@ -82,9 +82,46 @@ class AddFormCompany(FlaskForm):
     size = SelectField('size',choices=[('1','1-10'),('2','10-50'),('3','50-100'),('4','100-250'),('5','250-1000'),('6','1000-5000'),('7','5000-10000'),('8','10000-25000'),('9','25000+')])
     description = TextAreaField('description')
 
+# class CandidateProfile():
+#     def __init__(self):
+#         uid = None
+#         name = None
+#         password = None
+#         university = None
+#         skills = {} #key:skill name, value: proficency
+#         majors = {} #key: name, value: level
+#         applyjobs = [] #(cid,title)
+
+#     def setuid(self,uid):
+#         self.uid = uid
+
+#     def setname(self,name):
+#         self.name = name
+
+#     def setpassword(self,password):
+#         self.password = password
+
+#     def setuniversity(self,university):
+#         self.university = university
+
+#     def addskills(self,skill,proficency):
+#         self.skills[skill] = proficency
+
+#     def addmajors(self,major,level):
+#         self.majors[major] = level
+
+#     def addapplyjobs(self,cid,title):
+#         applyjobs.append((cid,title))
+
+#     def name(self):
+#         print self.name
+#         return self.name
+
+
+
 def check_exist_uid(uid):
     """
-    used in sign up, check whether the uid exist in database
+    if uid exist in database, return True
     """
     uidlist = []
     cursor1 = g.conn.execute("select uid from candidate")
@@ -101,6 +138,9 @@ def check_exist_uid(uid):
         return False
 
 def check_exist_cid(cid):
+    """
+    if cid exist in database, return True
+    """
     cidlist = []
     cursor = g.conn.execute("select cid from companyusers_affi")
     for result in cursor:
@@ -142,10 +182,17 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/dashboard')
+@app.route('/dashboard_can/<uid>')
 @login_required
-def dashboard():
-    return render_template('dashboard.html')
+def dashboard_can(uid):
+    getcandidate = "SELECT * FROM candidate WHERE uid=:uid;"
+    cursor = g.conn.execute(text(getcandidate),uid=uid)
+    for result in cursor:
+        name = result['name']
+        university = result['university']
+
+    context = dict(name=name,university=university)
+    return render_template('dashboard_can.html',**context)
 
 #credit to https://github.com/realpython/discover-flas
 @app.route('/login_can', methods=['GET', 'POST'])
@@ -173,7 +220,7 @@ def login_can():
 
             if m[0] == password:
                 session['logged_in'] = True
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('dashboard_can',uid=uid))
             else:
                 error = 'Invalid login_can. Please try again.'
                 return render_template('login_can.html', error=error)
