@@ -228,7 +228,10 @@ def dashboard_com(uid):
     context = dict(uid=uid, name=name,cid=cid,cname=cname,size=size,description=description,jobs=jobs)
     return render_template('dashboard_com.html',**context)
 
-
+@app.route('/editjob/<cid>/<title>')
+@login_required_com
+def editjob(cid,title):
+    return render_template('editjob.html')
 
 
 #credit to https://github.com/realpython/discover-flas
