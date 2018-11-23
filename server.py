@@ -185,7 +185,51 @@ def login_can():
 
     return render_template('login_can.html')
 
-@app.route('/login_com')
+
+
+@app.route('/login_com', methods=['GET', 'POST'])
+def login_com():
+    if request.method == 'POST':
+        # Get Form Fields
+        uid = request.form.get('uid')
+        password = request.form.get('password')
+        print uid
+        print password
+
+        cursor = g.conn.execute("SELECT uid FROM companyusers_affi;")
+        l = []
+        for row in cursor:
+            l.append(row['uid'])
+            print("uid:", row['uid'])
+
+        if int(uid) in l:
+            t = text("SELECT password FROM companyusers_affi where uid = :newuid ;")
+            cursor = g.conn.execute(t, newuid=uid)
+            m = []
+            for row in cursor:
+                m.append(row['password'])
+                print("password:", row['password'])
+
+            if m[0] == password:
+                session['logged_in'] = True
+                return redirect(url_for('dashboard'))
+            else:
+                error = 'Invalid login_com. Please try again.'
+                return render_template('login_com.html', error=error)
+            # Close connection
+            cur.close()
+        else:
+            error = 'Uid not found'
+            return render_template('login_com.html', error=error)
+
+    return render_template('login_com.html')
+
+
+
+
+
+
+
 
 @app.route('/logout')
 def logout():
