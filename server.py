@@ -446,6 +446,39 @@ def add_company():
     return render_template('/add_company.html',form=form, notvalidcid=False)
 
 
+class updateClass_can(FlaskForm):
+    """add company to database"""
+    uid = IntegerField('uid',validators=[InputRequired()])
+    name = StringField('name')
+    password = PasswordField('password')
+    university = StringField('university')
+    major = StringField('major')
+    skill1 = StringField('skill1')
+    skill2 = StringField('skill2')
+    skill3 = StringField('skill3')
+
+
+@app.route('/updateInfo_can', methods=['GET', 'POST'])
+@login_required_com
+def updateInfo_can():
+    form = updateClass_can()
+    print 'uid:{}'.format(form.uid.data)
+    if form.validate_on_submit():
+        print 'add new user'
+        newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
+        newuid = form.uid.data
+        newname = form.username.data
+        newpassword = form.password.data
+        newuniversity = form.university.data
+        flag = check_exist_uid(newuid)
+        if not flag:
+            g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
+                           password = newpassword, university = newuniversity);
+            return redirect(url_for('login_can'))
+        else:
+            return render_template('/updateinfo_can.html', form=form, notvaliduser = True)
+    return render_template('/updateinfo_can.html', form=form, notvaliduser = False)
+
 """
 if __name__ == '__main__':
     app.run(debug=True)
