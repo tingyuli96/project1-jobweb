@@ -7,7 +7,6 @@ Dashboard
 {% block styles %}
 {{super()}}
 <link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
-<link rel="stylesheet" href="{{url_for('.static', filename='signin.css')}}">
 {% endblock %}
 
 {% block content %}
@@ -61,52 +60,43 @@ Dashboard
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <h2 class="header">{{ position['title'] }}</h2>
           <h3 class="header">Company: {{ company['cname'] }}</h3>
-          <small>post time: {{ position['posttime'] }}</small>
-          <h4 class="sub-header">Overview<a href="/editjob_overview/{{position['cid']}}/{{position['title']}}" class="btn btn-default">Edit</a></h4>
+          <h4 class="sub-header">overview</h4>
           <div class="table-responsive">
             <table class="table table-striped">
 <!--               <thead>
                 <tr>
-                  <th>Overview</th>
+                  <th></th>
+                  <th>Header</th>
+                  <th>Header</th>
+                  <th>Header</th>
+                  <th>Header</th>
                 </tr>
               </thead> -->
               <tbody>
                 <tr>
                   <td>worktype</td>
-                  <td>
-                    {{ position['worktype'] }}
-                  </td>
+                  <td>{{ position['worktype'] }}</td>
                 </tr>
                 <tr>
                   <td>application deadline</td>
-                  <td>
-                    {{ position['appddl'] }}
-                  </td>
+                  <td>{{ position['appddl'] }}</td>
                 </tr>
                 <tr>
                   <td>city</td>
-                  <td>
-                    {{ position['city'] }}
-                  </td>
+                  <td>{{ position['city'] }}</td>
                 </tr>
                 <tr>
                   <td>state</td>
-                  <td>
-                    {{ position['state'] }}
-                  </td>
+                  <td>{{ position['state'] }}</td>
                 </tr>
                 <tr>
                   <td>country</td>
                   <td>{{ position['country'] }}</td>
                 </tr>
-                <tr>
-                  <td>description</td>
-                  <td>{{ position['description'] }}</td>
-                </tr>
               </tbody>
             </table>
           </div>
-          <h4 class="sub-header">required skills<a href="/addjob_skill/{{position['cid']}}/{{position['title']}}" class="btn btn-default">Add</a></h4>
+          <h4 class="sub-header">required skills</h4>
           <div class="table-responsive">
             <table class="table table-striped">
               <thead>
@@ -122,14 +112,12 @@ Dashboard
                   <td>{{ loop.index }}</td>
                   <td>{{ skill['sname'] }}</td>
                   <td>{{ skill['proficiency']}}</td>
-                  <td><a href="/editjob_skill/{{position['cid']}}/{{position['title']}}/{{ skill['sname'] }}" class="btn btn-default">edit</a></td>
-                  <td><a href="/deletejob_skill/{{position['cid']}}/{{position['title']}}/{{ skill['sname'] }}" class="btn btn-default">delete</a></td>
                 </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
-          <h4 class="sub-header">expected major<a href="/addjob_major/{{position['cid']}}/{{position['title']}}" class="btn btn-default">Add</a></h4>
+          <h4 class="sub-header">expected major</h4>
           <div class="table-responsive">
             <table class="table table-striped">
               <thead>
@@ -145,8 +133,6 @@ Dashboard
                   <td>{{ loop.index }}</td>
                   <td>{{ major['mname'] }}</td>
                   <td>{{ major['level']}}</td>
-                  <td><a href="/editjob_major/{{position['cid']}}/{{position['title']}}/{{ major['mname'] }}" class="btn btn-default">edit</a></td>
-                  <td><a href="/deletejob_major/{{position['cid']}}/{{position['title']}}/{{ major['mname'] }}" class="btn btn-default">delete</a</td>
                 </tr>
                 {% endfor %}
               </tbody>

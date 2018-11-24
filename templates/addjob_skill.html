@@ -65,57 +65,19 @@ Post Job
         <div class="container">
           <form class="form-signin">
             <h2 class="form-signin-heading">Post Job</h2>
-            {% if titleerror %}
-            <p>title already exist, please use another title</p>
+            {% if nameerror %}
+            <p>skill exist, please add another</p>
             {% endif %}
-            {% if locationerror %}
-            <p>location does't exist in database, please add or check</p>
-            {% endif %}
-            {% if dateerror %}
-            <p>date formate isn't right</p>
-            {% endif %}
-            <label for="title">Job Title</label>
-            <input type="text" id="title" class="form-control" placeholder="title" name="title" required autofocus>
-            <label for="worktype">Work Type</label>
-            <select class="form-control" id="worktype" name="worktype" required>
-              <option disabled selected value>>work type</option>
-              <option value="Full-Time Job">Full-Time Job</option>
-              <option value="Part-Time Job">Part-Time Job</option>
-              <option value="Full-Time Internship">Full-Time Internship</option>
-              <option value="Part-Time Internship">Part-Time Internship</option>
-            </select>
-            <label for="appddl">application deadline</label>
-            <input type="date" id="appddl" class="form-control" placeholder="2018-01-01" name="appddl" required autofocus>
-            <script>
-              $( function() {
-                $( ".simple_date" ).datepicker();
-              } );
-            </script>
-            <label for="city">city</label>
-            <select class="form-control" id="city" name="city" required>
-              <option disabled selected value>City</option>
-              {% for i in hascity %}
+            <label for="sname">skill</label>
+            <input type="text" id="sname" class="form-control" placeholder="java" name="sname" required autofocus>
+            <label for="proficiency">proficiency</label>
+            <select class="form-control" id="proficiency" name="proficiency">
+              <option disabled selected value>--select proficiency--</option>
+              {% for i in range(1,6) %}
               <option value="{{i}}">{{i}}</option>
               {% endfor %}
             </select>
-            <label for="state">State</label>
-            <select class="form-control" id="state" name="state" required>
-              <option disabled selected value>state</option>
-              {% for i in hasstate %}
-              <option value="{{i}}">{{i}}</option>
-              {% endfor %}
-            </select>
-            <label for="country">Country</label>
-            <select class="form-control" id="country" name="country" required>
-              <option disabled selected value>country</option>
-              {% for i in hascountry %}
-              <option value="{{i}}">{{i}}</option>
-              {% endfor %}
-            </select>
-            <p><a href="/addlocation_com/{{cid}}/{{uid}}">Don't see your location? Add here</a></p>
-            <label>description</label>
-            <textarea class="form-control" placeholder="input your description" id="description" name="description" rows="3" required autofocus></textarea>
-            <button class="btn btn-lg btn-primary btn-block" type="submit" formmethod="post">Post Job</button>
+            <button class="btn btn-lg btn-primary btn-block" type="submit" formmethod="post">Add skills</button>
           </form>
 
         </div>

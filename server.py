@@ -101,7 +101,7 @@ class AddFormCompany(FlaskForm):
 #         name = None
 #         password = None
 #         university = None
-#         skills = {} #key:skill name, value: proficency
+#         skills = {} #key:skill name, value: proficiency
 #         majors = {} #key: name, value: level
 #         applyjobs = [] #(cid,title)
 
@@ -117,8 +117,8 @@ class AddFormCompany(FlaskForm):
 #     def setuniversity(self,university):
 #         self.university = university
 
-#     def addskills(self,skill,proficency):
-#         self.skills[skill] = proficency
+#     def addskills(self,skill,proficiency):
+#         self.skills[skill] = proficiency
 
 #     def addmajors(self,major,level):
 #         self.majors[major] = level
@@ -258,14 +258,16 @@ def dashboard_com(uid):
         name = result['name']
         cid = result['cid']
     cursor1.close()
-    cursor2 = g.conn.execute("SELECT * from company WHERE cid = {};".format(cid))
+    command = "SELECT * from company WHERE cid = :cid;"
+    cursor2 = g.conn.execute(text(command),cid=cid)
     sizedic=dict([('1','1-10'),('2','10-50'),('3','50-100'),('4','100-250'),('5','250-1000'),('6','1000-5000'),('7','5000-10000'),('8','10000-25000'),('9','25000+')])
     for result in cursor2:
         cname = result['cname']
         size = sizedic[str(result['size'])]
         description = result['description']
     cursor2.close()
-    cursor3 = g.conn.execute("SELECT title, posttime FROM position_liein_post WHERE cid = {} and uid = {};".format(cid,uid))
+    command = "SELECT title, posttime FROM position_liein_post WHERE cid = :cid and uid = :uid;"
+    cursor3 = g.conn.execute(text(command),cid=cid,uid=uid)
     jobs = []
     for result in cursor3:
         jobs.append(result)
@@ -310,7 +312,8 @@ def postjob(cid,uid):
                 dateflag = True
         validdate = dateformateflag and monthflag and dateflag
         # get exist title of this cid
-        cursor = g.conn.execute("SELECT title from position_liein_post WHERE cid={}".format(cid))
+        command = "SELECT title from position_liein_post WHERE cid=:cid;"
+        cursor = g.conn.execute(text(command),cid=cid)
         hastitle = []
         for result in cursor:
             hastitle.append(result['title'])
@@ -368,24 +371,191 @@ def editjob(cid,title):
     other uid can edie too
     """
     uid = session['uid']
-    cursor = g.conn.execute("SELECT * FROM company WHERE cid = {};".format(cid))
+    command = "SELECT * FROM company WHERE cid = :cid;"
+    cursor = g.conn.execute(text(command),cid=cid)
     for result in cursor:
         company = result
-    cursor = g.conn.execute("SELECT * FROM position_liein_post where cid = {} and title = '{}';".format(cid,title))
+    command = "SELECT * FROM position_liein_post where cid = :cid and title = :title;"
+    cursor = g.conn.execute(text(command),cid=cid,title=title)
     for result in cursor:
         position = result
     cursor.close()
-    cursor = g.conn.execute("SELECT * FROM pos_require_skills where cid = {} and title = '{}';".format(cid,title))
+    command = "SELECT * FROM pos_require_skills where cid = :cid and title = :title;"
+    cursor = g.conn.execute(text(command), cid=cid,title=title)
     skills = []
     for result in cursor:
         skills.append(result)
     cursor.close()
-    cursor = g.conn.execute("SELECT * FROM pos_expect_major where cid = {} and title = '{}'".format(cid,title))
+    command = "SELECT * FROM pos_expect_major where cid = :cid and title = :title"
+    cursor = g.conn.execute(text(command),cid=cid,title=title)
     majors = []
     for result in cursor:
         majors.append(result)
     context = dict(uid=uid, company = company, position = position, skills = skills, majors = majors)
     return render_template('editjob.html', **context)
+
+@app.route('/editjob_overview/<cid>/<title>', methods = ['GET','POST'])
+@login_required_com
+def editjob_overview(cid,title):
+    uid = session['uid']
+    cursor = g.conn.execute("SELECT * FROM location")
+    hascity = Set()
+    hasstate = Set()
+    hascountry = Set()
+    haslocation = []
+    for result in cursor:
+        hascity.add(result['city'])
+        hasstate.add(result['state'])
+        hascountry.add(result['country'])
+        haslocation.append(result)
+    cursor.close()
+    context = dict(cid=cid,uid=uid,tiltle=title, hascity=hascity,hasstate=hasstate,hascountry=hascountry, locationerror=False, dateerror=False)
+    if request.method == 'POST':
+        appddl = request.form.get('appddl')
+        worktype = request.form.get('worktype')
+        description = request.form.get('description')
+        city = request.form.get('city')
+        state = request.form.get('state')
+        country = request.form.get('country')
+        posttime = str(date.today())
+        # check if appdl is the right formate
+        dateformateflag = re.match(r"\d{4}-\d{2}-\d{2}",appddl) #return True if match
+        monthflag = False 
+        dateflag = False
+        if dateformateflag:
+            month = int(re.search(r"(?<=\d{4}-)\d{2}",appddl).group(0)) 
+            if month > 0 and month < 13:
+                monthflag = True
+            day = int(re.search(r"\d{2}$",appddl).group(0))
+            if day > 0 and day < 31:
+                dateflag = True
+        validdate = dateformateflag and monthflag and dateflag
+        # get exist title of this cid
+        if (city,state,country) in haslocation and validdate:
+            command = "UPDATE position_liein_post SET country=:country,state=:state,\
+                        city=:city,description=:description,worktype=:worktype,\
+                        appddl=:appddl,posttime=:posttime\
+                        WHERE cid=:cid and title = :title;"
+            cursor = g.conn.execute(text(command),cid=cid,country=country,state=state,city=city,title=title,description=description,worktype=worktype,appddl=appddl,posttime=posttime)
+            cursor.close()
+            return redirect(url_for('editjob',cid=cid,title=title))
+        if (city,state,country) not in haslocation:
+            context['locationerror'] = True
+        if not validdate:
+            context['dateerror'] = True
+        return render_template('/editjob_overview.html',**context)
+    return render_template('/editjob_overview.html',**context)
+
+@app.route('/addjob_skill/<cid>/<title>', methods = ['GET','POST'])
+@login_required_com
+def addjob_skill(cid,title):
+    """
+    add skill to pos_require_skills
+    """
+    context = dict(cid=cid,title=title,nameerror=False)
+    if request.method == 'POST':
+        skills = {}
+        sname = request.form.get('sname')
+        proficiency = request.form.get('proficiency')
+        cursor = g.conn.execute("SELECT * FROM skills")
+        hasskills = [] # skill in table skill
+        for result in cursor:
+            hasskills.append(result['sname'])
+        if sname not in hasskills:
+            command = "INSERT INTO skills VALUES (:sname);"
+            cursor = g.conn.execute(text(command),sname=sname)
+        command = "SELECT sname FROM pos_require_skills WHERE cid = :cid and title = :title;"
+        cursor = g.conn.execute(text(command),cid=cid,title=title)
+        hassname = [] # skill in pos_require_skill
+        for result in cursor:
+            hassname.append(result['sname'])
+        if sname not in hassname:
+            print 'proficiency={}'.format(proficiency)
+            command = "INSERT INTO pos_require_skills VALUES (:title,:cid,:sname,:proficiency);"
+            cursor = g.conn.execute(text(command),title=title,cid=cid,sname=sname,proficiency=proficiency)
+            cursor.close()
+            return redirect(url_for('editjob',cid=cid,title=title))
+        else:
+            context['nameerror']=True
+            cursor.close()
+            return render_template('addjob_skill.html',**context)
+    return render_template('addjob_skill.html',**context)
+
+@app.route('/editjob_skill/<cid>/<title>/<sname>', methods = ['GET','POST'])
+@login_required_com
+def editjob_skill(cid,title,sname):
+    context = dict(cid=cid,title=title,sname=sname)
+    if request.method == 'POST':
+        proficiency =  request.form.get("proficiency")
+        command = "UPDATE pos_require_skills SET proficiency = :proficiency WHERE cid=:cid and title=:title and sname=:sname;"
+        cursor = g.conn.execute(text(command),proficiency=proficiency,cid=cid,title=title,sname=sname)
+        cursor.close()
+        return redirect(url_for('editjob',cid=cid,title=title))
+    return render_template('/editjob_skill.html',**context)
+
+@app.route('/deletejob_skill/<cid>/<title>/<sname>')
+@login_required_com
+def deletejob_skill(cid,title,sname):
+    command = "DELETE FROM pos_require_skills WHERE cid=:cid and title=:title and sname=:sname;"
+    cursor=g.conn.execute(text(command),cid=cid,title=title,sname=sname)
+    cursor.close()
+    return redirect(url_for('editjob',cid=cid,title=title))
+
+@app.route('/addjob_major/<cid>/<title>', methods = ['GET','POST'])
+@login_required_com
+def addjob_major(cid,title):
+    """
+    add skill to pos_require_skills
+    """
+    context = dict(cid=cid,title=title,nameerror=False)
+    if request.method == 'POST':
+        majors = {}
+        mname = request.form.get('mname')
+        level = request.form.get('level')
+        cursor = g.conn.execute("SELECT * FROM major")
+        hasmajors = [] # skill in table skill
+        for result in cursor:
+            hasmajors.append(result['mname'])
+        if mname not in hasmajors:
+            command = "INSERT INTO major VALUES (:mname);"
+            cursor = g.conn.execute(text(command),mname=mname)
+        command = "SELECT mname FROM pos_expect_major WHERE cid = :cid and title = :title;"
+        cursor = g.conn.execute(text(command),cid=cid,title=title)
+        hasmname = [] # skill in pos_expect_skill
+        for result in cursor:
+            hasmname.append(result['mname'])
+        if mname not in hasmname:
+            print 'level={}'.format(level)
+            command = "INSERT INTO pos_expect_major(title,cid,mname,level) VALUES (:title,:cid,:mname,:level);"
+            cursor = g.conn.execute(text(command),title=title,cid=cid,mname=mname,level=level)
+            cursor.close()
+            return redirect(url_for('editjob',cid=cid,title=title))
+        else:
+            context['nameerror']=True
+            cursor.close()
+            return render_template('addjob_major.html',**context)
+    return render_template('addjob_major.html',**context)
+
+@app.route('/editjob_major/<cid>/<title>/<mname>', methods = ['GET','POST'])
+@login_required_com
+def editjob_major(cid,title,mname):
+    context = dict(cid=cid,title=title,mname=mname)
+    if request.method == 'POST':
+        level =  request.form.get("level")
+        command = "UPDATE pos_expect_major SET level = :level WHERE cid=:cid and title=:title and mname=:mname;"
+        cursor = g.conn.execute(text(command),level=level,cid=cid,title=title,mname=mname)
+        cursor.close()
+        return redirect(url_for('editjob',cid=cid,title=title))
+    return render_template('/editjob_major.html',**context)
+
+@app.route('/deletejob_major/<cid>/<title>/<mname>')
+@login_required_com
+def deletejob_major(cid,title,mname):
+    command = "DELETE FROM pos_expect_major WHERE cid=:cid and title=:title and mname=:mname;"
+    cursor=g.conn.execute(text(command),cid=cid,title=title,mname=mname)
+    cursor.close()
+    return redirect(url_for('editjob',cid=cid,title=title))
+
 
 
 #credit to https://github.com/realpython/discover-flas
@@ -574,7 +744,7 @@ class updateClass_can(FlaskForm):
     password = PasswordField('password')
     university = StringField('university')
     major = StringField('major(eg: Computer Science,PHD)')
-    skill1 = StringField('skill1(skill name,proficency level(number 1-5, 5 means expert)), eg: Java,3')
+    skill1 = StringField('skill1(skill name,proficiency level(number 1-5, 5 means expert)), eg: Java,3')
     skill2 = StringField('skill2, eg: Java,5')
     skill3 = StringField('skill3, eg: Java,5')
     preLoc = StringField('prefered location(city,state,country, eg: New York,NY,US)')

@@ -64,21 +64,16 @@ Post Job
         </div>
         <div class="container">
           <form class="form-signin">
-            <h2 class="form-signin-heading">Post Job</h2>
-            {% if titleerror %}
-            <p>title already exist, please use another title</p>
-            {% endif %}
+            <h2 class="form-signin-heading">Eidt Job Overview</h2>
             {% if locationerror %}
             <p>location does't exist in database, please add or check</p>
             {% endif %}
             {% if dateerror %}
             <p>date formate isn't right</p>
             {% endif %}
-            <label for="title">Job Title</label>
-            <input type="text" id="title" class="form-control" placeholder="title" name="title" required autofocus>
             <label for="worktype">Work Type</label>
-            <select class="form-control" id="worktype" name="worktype" required>
-              <option disabled selected value>>work type</option>
+            <select class="form-control" id="worktype" name="worktype" required autofocus>
+              <option disabled selected value>--select work type--</option>
               <option value="Full-Time Job">Full-Time Job</option>
               <option value="Part-Time Job">Part-Time Job</option>
               <option value="Full-Time Internship">Full-Time Internship</option>
@@ -92,22 +87,22 @@ Post Job
               } );
             </script>
             <label for="city">city</label>
-            <select class="form-control" id="city" name="city" required>
-              <option disabled selected value>City</option>
+            <select class="form-control" id="city" name="city" required autofocus>
+              <option disabled selected value>--select City--</option>
               {% for i in hascity %}
               <option value="{{i}}">{{i}}</option>
               {% endfor %}
             </select>
             <label for="state">State</label>
-            <select class="form-control" id="state" name="state" required>
-              <option disabled selected value>state</option>
+            <select class="form-control" id="state" name="state" required autofocus>
+              <option disabled selected value>--select state--</option>
               {% for i in hasstate %}
               <option value="{{i}}">{{i}}</option>
               {% endfor %}
             </select>
             <label for="country">Country</label>
-            <select class="form-control" id="country" name="country" required>
-              <option disabled selected value>country</option>
+            <select class="form-control" id="country" name="country" required autofocus>
+              <option disabled selected value>--select country--</option>
               {% for i in hascountry %}
               <option value="{{i}}">{{i}}</option>
               {% endfor %}
@@ -115,7 +110,7 @@ Post Job
             <p><a href="/addlocation_com/{{cid}}/{{uid}}">Don't see your location? Add here</a></p>
             <label>description</label>
             <textarea class="form-control" placeholder="input your description" id="description" name="description" rows="3" required autofocus></textarea>
-            <button class="btn btn-lg btn-primary btn-block" type="submit" formmethod="post">Post Job</button>
+            <button class="btn btn-lg btn-primary btn-block" type="submit" formmethod="post">Update Job</button>
           </form>
 
         </div>
