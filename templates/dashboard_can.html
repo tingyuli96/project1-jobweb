@@ -116,30 +116,28 @@ Dashboard
                   <td>expected location</td>
                   <td>{{loc}}</td>
                 </tr>
-                <tr>
+                <!---<tr>
                   <td>applied job</td>
                   <td>{{job}}</td>
-                </tr>
+                </tr>-->
               </tbody>
             </table>
-            <h4 class="sub-header">Posted Job</h4>
+            <h4 class="sub-header">Applied Job</h4>
             <table class="table table-striped">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Posted Time</th>
+                  <th>Company</th>
                   <th>Job title</th>
                 </tr>
               </thead>
               <tbody>
-                {% set i = 1 %}
                 {% for job in jobs %}
                 <tr>
-                  <td>{{i}}</td>
-                  <td>{{job['posttime']}}
+                  <td>{{loop.index}}</td>
+                  <td>{{job['cname']}}
                   <td>{{job['title']}}</td>
                 </tr>
-                  {% set i = i + 1 %}
                 {% endfor %}
                 
               </tbody>
