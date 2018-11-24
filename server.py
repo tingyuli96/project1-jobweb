@@ -365,6 +365,9 @@ def editjob(cid,title):
     other uid can edie too
     """
     uid = session['uid']
+    cursor = g.conn.execute("SELECT * FROM company WHERE cid = {};".format(cid))
+    for result in cursor:
+        company = result
     cursor = g.conn.execute("SELECT * FROM position_liein_post where cid = {} and title = '{}';".format(cid,title))
     for result in cursor:
         position = result
@@ -378,7 +381,7 @@ def editjob(cid,title):
     majors = []
     for result in cursor:
         majors.append(result)
-    context = dict(uid=uid,position = position, skills = skills, majors = majors)
+    context = dict(uid=uid, company = company, position = position, skills = skills, majors = majors)
     return render_template('editjob.html', **context)
 
 
