@@ -325,8 +325,6 @@ def postjob(cid,uid):
         if not validdate:
             context['dateerror'] = True
         return render_template('postjob.html',**context)
-
-        return render_template('postjob.html',**context)
     return render_template('/postjob.html',**context)
 
 
