@@ -331,6 +331,7 @@ def postjob(cid,uid):
         return render_template('postjob.html',**context)
     return render_template('/postjob.html',**context)
 
+
 @app.route('/addlocation_com/<cid>/<uid>', methods = ['GET','POST'])
 def addlocation_com(cid,uid):
     if request.method == 'POST':
@@ -352,17 +353,37 @@ def addlocation_com(cid,uid):
             cursor.close()
             return redirect(url_for('postjob',cid=cid,uid=uid))
         else:
-            return render_template('addlocation.html', error=True)
+            return render_template('addlocation.html', uid = uid, error=True)
 
-    return render_template('addlocation.html', error=False)
+    return render_template('addlocation.html', uid = uid, error=False)
+
+@app.route('/editprofile_com/<cid>/<uid>', methods = ['GET','POST'])
+def editprofile_com(cid,uid):
 
 
 
-
-@app.route('/editjob/<cid>/<title>')
+@app.route('/editjob/<cid>/<uid>/<title>')
 @login_required_com
-def editjob(cid,title):
-    return render_template('editjob.html')
+def editjob(cid,uid,title):
+    """
+    show the overview of the job and edit on the end of list
+    other uid can edie too
+    """
+    cursor = g.conn.execute("SELECT * FROM position_liein_post where cid = {} and title = {};".format(cid,title))
+    for result in cursor:
+        position = result
+    cursor.close()
+    cursor = g.conn.execute("SELECT * FROM pos_require_skills where cid = {} and title = {};".format(cid,title))
+    skills = []
+    for result in cursor:
+        skills.append(result)
+    cursor.close()
+    cursor = g.conn.execute("SELECT * FROM pos_expect_major where cid = {} and title = {}".format(cid,title))
+    majors = []
+    for result in cursor:
+        majors.append(result)
+    context = dict(position = position, skills = skills, majors = majors)
+    return render_template('editjob.html', **context)
 
 
 #credit to https://github.com/realpython/discover-flas
