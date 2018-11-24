@@ -740,7 +740,6 @@ def add_company():
 
 class updateClass_can(FlaskForm):
     """add company to database"""
-    name = StringField('name')
     password = PasswordField('password')
     university = StringField('university')
     major = StringField('major(eg: Computer Science,PHD)')
@@ -750,15 +749,19 @@ class updateClass_can(FlaskForm):
     preLoc = StringField('prefered location(city,state,country, eg: New York,NY,US)')
 
 
+
+# @app.route('/editjob/<cid>/<title>')
+# @login_required_com
+# def editjob(cid,title):
+
+
 @app.route('/updateInfo_can', methods=['GET', 'POST'])
-@login_required_com
+@login_required_can
 def updateInfo_can():
     form = updateClass_can()
     #print 'uid:{}'.format(form.uid.data)
+    uid = session['uid']
     if form.validate_on_submit():
-
-        newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
-        newName = form.name.data
         newPassword = form.password.data
         newUniversity = form.university.data
         newMajor = form.major.data
@@ -766,13 +769,18 @@ def updateInfo_can():
         newSkill1 = form.skill1.data
         newSkill2 = form.skill2.data
         newSkill3 = form.skill3.data
+        if newPassword != '':
+            comm = "update candidate set password =:newPassword where uid =:uid; "
+            g.conn.execute(text(comm), uid=uid, newPassword=newPassword)
 
-        if not flag:
-            g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
-                           password = newpassword, university = newuniversity);
-            return redirect(url_for('login_can'))
-        else:
-            return render_template('/updateinfo_can.html', form=form, notvaliduser = True)
+
+
+        # if not flag:
+        #     g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
+        #                    password = newpassword, university = newuniversity);
+        #     return redirect(url_for('login_can'))
+        # else:
+        #     return render_template('/updateinfo_can.html', form=form, notvaliduser = True)
     return render_template('/updateinfo_can.html', form=form, notvaliduser = False)
 
 """
