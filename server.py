@@ -20,6 +20,9 @@ from wtforms import StringField, TextAreaField, PasswordField, SelectField, Bool
 from wtforms.validators import InputRequired,  DataRequired, Length, NumberRange
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from datetime import date
+from sets import Set
+import re
 # tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 # app = Flask(__name__, template_folder=tmpl_dir)
 app = Flask(__name__)
@@ -53,7 +56,7 @@ engine = create_engine(DATABASEURI)
 def login_required_can(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'logged_in' in session:
+        if 'uid' in session:
             return f(*args, **kwargs)
         else:
             #flash('hey yo login first')
@@ -63,7 +66,7 @@ def login_required_can(f):
 def login_required_com(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'logged_in' in session:
+        if 'uid' in session:
             return f(*args, **kwargs)
         else:
             #flash('hey yo login first')
@@ -189,7 +192,11 @@ def teardown_request(exception):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if 'uid' in session:
+        uid = session['uid']
+        return render_template('index.html',uid=uid)
+    else:
+        return render_template('index.html',uid=None)
 
 
 @app.route('/dashboard_can/<uid>')
@@ -263,7 +270,118 @@ def dashboard_com(uid):
     context = dict(uid=uid, name=name,cid=cid,cname=cname,size=size,description=description,jobs=jobs)
     return render_template('dashboard_com.html',**context)
 
+@app.route('/postjob/<cid>/<uid>', methods=['GET','POST'])
+@login_required_com
+def postjob(cid,uid):
+    cursor = g.conn.execute("SELECT * FROM location")
+    hascity = Set()
+    hasstate = Set()
+    hascountry = Set()
+    haslocation = []
+    for result in cursor:
+        hascity.add(result['city'])
+        hasstate.add(result['state'])
+        hascountry.add(result['country'])
+        haslocation.append(result)
+    cursor.close()
+    context = dict(cid=cid,uid=uid,hascity=hascity,hasstate=hasstate,hascountry=hascountry, locationerror=False, titleerror=False, dateerror=False)
+    if request.method == 'POST':
+        title = request.form.get('title')
+        appddl = request.form.get('appddl')
+        worktype = request.form.get('worktype')
+        description = request.form.get('description')
+        city = request.form.get('city')
+        state = request.form.get('state')
+        country = request.form.get('country')
+        posttime = str(date.today())
+        # check if appdl is the right formate
+        dateformateflag = re.match(r"\d{4}-\d{2}-\d{2}",appddl) #return True if match
+        monthflag = False 
+        dateflag = False
+        if dateformateflag:
+            month = int(re.search(r"(?<=\d{4}-)\d{2}",appddl).group(0)) 
+            if month > 0 and month < 13:
+                monthflag = True
+            day = int(re.search(r"\d{2}$",appddl).group(0))
+            if day > 0 and day < 31:
+                dateflag = True
+        validdate = dateformateflag and monthflag and dateflag
+        # get exist title of this cid
+        cursor = g.conn.execute("SELECT title from position_liein_post WHERE cid={}".format(cid))
+        hastitle = []
+        for result in cursor:
+            hastitle.append(result['title'])
+        print 'posttime:{}'.format(posttime)
+        if (city,state,country) in haslocation and title not in hastitle and validdate:
+            command = "INSERT INTO position_liein_post VALUES(:cid,:uid,:country,:state,:city,:title,:description,:worktype,:appddl,:posttime);"
+            cursor = g.conn.execute(text(command),cid=cid,uid=uid,country=country,state=state,city=city,title=title,description=description,worktype=worktype,appddl=appddl,posttime=posttime)
+            cursor.close()
+            return redirect(url_for('editjob',cid=cid,title=title))
+        if title in hastitle:
+            print '--------title exist-------------'
+            context['titleerror'] = True
+        if (city,state,country) not in haslocation:
+            context['locationerror'] = True
+        if not validdate:
+            context['dateerror'] = True
+        return render_template('postjob.html',**context)
 
+        return render_template('postjob.html',**context)
+    return render_template('/postjob.html',**context)
+
+
+@app.route('/addlocation_com/<cid>/<uid>', methods = ['GET','POST'])
+def addlocation_com(cid,uid):
+    if request.method == 'POST':
+        city = request.form.get('city')
+        state = request.form.get('state')
+        country = request.form.get('country')
+        cursor = g.conn.execute("SELECT * FROM location")
+        hascity = Set()
+        hasstate = Set()
+        hascountry = Set()
+        for result in cursor:
+            hascity.add(result['city'])
+            hasstate.add(result['state'])
+            hascountry.add(result['country'])
+        cursor.close()
+        if city not in hascity or state not in hasstate or country not in hascountry:
+            command = "INSERT INTO location VALUES (:city,:state,:country);"
+            cursor = g.conn.execute(text(command),city=city,state=state,country=country);
+            cursor.close()
+            return redirect(url_for('postjob',cid=cid,uid=uid))
+        else:
+            return render_template('addlocation.html', uid = uid, error=True)
+
+    return render_template('addlocation.html', uid = uid, error=False)
+
+# @app.route('/editprofile_com/<cid>/<uid>', methods = ['GET','POST'])
+# def editprofile_com(cid,uid):
+
+
+
+@app.route('/editjob/<cid>/<title>')
+@login_required_com
+def editjob(cid,title):
+    """
+    show the overview of the job and edit on the end of list
+    other uid can edie too
+    """
+    cursor = g.conn.execute("SELECT * FROM position_liein_post where cid = {} and title = {};".format(cid,title))
+    for result in cursor:
+        position = result
+    cursor.close()
+    cursor = g.conn.execute("SELECT * FROM pos_require_skills where cid = {} and title = {};".format(cid,title))
+    skills = []
+    for result in cursor:
+        skills.append(result)
+    cursor.close()
+    cursor = g.conn.execute("SELECT * FROM pos_expect_major where cid = {} and title = {}".format(cid,title))
+    majors = []
+    for result in cursor:
+        majors.append(result)
+    context = dict(position = position, skills = skills, majors = majors)
+    return render_template('editjob.html', **context)
 
 
 #credit to https://github.com/realpython/discover-flas
@@ -291,7 +409,7 @@ def login_can():
                 print("password:", row['password'])
 
             if m[0] == password:
-                session['logged_in'] = True
+                session['uid'] = request.form['uid']
                 return redirect(url_for('dashboard_can',uid=uid))
             else:
                 error = 'Invalid login_can. Please try again.'
@@ -330,7 +448,7 @@ def login_com():
                 print("password:", row['password'])
 
             if m[0] == password:
-                session['logged_in'] = True
+                session['uid'] = request.form['uid']
                 return redirect(url_for('dashboard_com',uid=uid))
             else:
                 error = 'Invalid login_com. Please try again.'
@@ -346,7 +464,7 @@ def login_com():
 
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None)
+    session.pop('uid', None)
     return redirect(url_for('index'))
 
 @app.route('/signup_candidate', methods=['GET', 'POST'])
