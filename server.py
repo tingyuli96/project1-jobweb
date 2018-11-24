@@ -88,6 +88,12 @@ class RegisterFormCompany(FlaskForm):
     password = PasswordField('password', validators=[InputRequired()])
     cid = IntegerField('cid', validators=[InputRequired()])
 
+class UpdateFormCompanyUser(FlaskForm):
+    """company user register"""
+    username = StringField('username', validators=[InputRequired()])
+    password = PasswordField('password', validators=[InputRequired()])
+    cid = IntegerField('cid', validators=[InputRequired()])
+
 class AddFormCompany(FlaskForm):
     """add company to database"""
     cid = IntegerField('cid',validators=[InputRequired()])
@@ -95,6 +101,11 @@ class AddFormCompany(FlaskForm):
     size = SelectField('size',choices=[('1','1-10'),('2','10-50'),('3','50-100'),('4','100-250'),('5','250-1000'),('6','1000-5000'),('7','5000-10000'),('8','10000-25000'),('9','25000+')])
     description = TextAreaField('description')
 
+class UpdateFormCompany(FlaskForm):
+    """add company to database"""
+    name = StringField('name',validators=[InputRequired()])
+    size = SelectField('size',choices=[('1','1-10'),('2','10-50'),('3','50-100'),('4','100-250'),('5','250-1000'),('6','1000-5000'),('7','5000-10000'),('8','10000-25000'),('9','25000+')])
+    description = TextAreaField('description')
 # class CandidateProfile():
 #     def __init__(self):
 #         uid = None
@@ -155,10 +166,12 @@ def check_exist_cid(cid):
     if cid exist in database, return True
     """
     cidlist = []
-    cursor = g.conn.execute("select cid from companyusers_affi")
+    cursor = g.conn.execute("select cid from company;")
     for result in cursor:
         cidlist.append(result['cid'])
     cursor.close()
+    print cidlist
+    print cid
     if cid in cidlist:
         return True
     else:
@@ -274,6 +287,82 @@ def dashboard_com(uid):
     cursor3.close()
     context = dict(uid=uid, name=name,cid=cid,cname=cname,size=size,description=description,jobs=jobs)
     return render_template('dashboard_com.html',**context)
+
+@app.route('/updateInfo_com', methods=['GET','POST'])
+@login_required_com
+def updateInfo_com():
+    uid = session['uid']
+    getcompanyuser = "SELECT * FROM companyusers_affi WHERE uid=:uid;"
+    cursor1 = g.conn.execute(text(getcompanyuser),uid=uid)
+    for result in cursor1:
+        cid = result['cid']
+    form = UpdateFormCompanyUser()
+    if form.validate_on_submit():
+        newusername = form.username.data
+        newpassword = form.password.data
+        newcid = form.cid.data
+        newcompanyuser = "UPDATE companyusers_affi SET name = :username,password=:password,cid=:cid WHERE uid=:uid;"
+        flag = check_exist_cid(newcid)
+        if flag:
+            print 'valid, add'
+            g.conn.execute(text(newcompanyuser), \
+                uid = uid,\
+                username = newusername,\
+                password = newpassword, \
+                cid = newcid);
+            return redirect(url_for('dashboard_com',uid=uid)) 
+        else:
+            print "not valid cid"
+            return render_template('/updateInfo_com', uid=uid, cid=cid, form=form, notvalidcid = True)
+    return render_template ('/updateInfo_com.html', uid=uid, cid=cid, form=form, notvalidcid=False)
+
+@app.route('/editcompany/<cid>', methods=['GET','POST'])
+@login_required_com
+def editcompany(cid):
+    uid = session['uid']
+    form = UpdateFormCompany()
+    if form.validate_on_submit():
+        print 'add_company'
+        newname = form.name.data
+        newsize = form.size.data
+        newdesciption = form.description.data
+        newcompany = "UPDATE company SET cname=:cname,size=:size,description=:description WHERE cid=:cid;"
+        g.conn.execute(text(newcompany),cid=cid,cname=newname,size=newsize,description=newdesciption)
+        return redirect(url_for('dashboard_com',uid=uid))
+    return render_template('/editcompany.html',uid=uid, cid=cid, form=form)
+
+@app.route('/deleteuser_com')
+@login_required_com
+def deleteuser_com():
+    uid = session['uid']
+    session.pop('uid', None)
+    command = "SELECT cid, title FROM position_liein_post WHERE uid=:uid;"
+    cursor = g.conn.execute(text(command),uid=uid)
+    joblist = []
+    for result in cursor:
+        joblist.append(result)
+    for job in joblist:
+        command = "DELETE FROM pos_require_skills WHERE cid=:cid and title=:title;"
+        cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
+        command = "DELETE FROM pos_expect_major WHERE cid=:cid and title=:title;"
+        cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
+    command = "DELETE FROM position_liein_post WHERE uid=:uid;"
+    cursor = g.conn.execute(text(command),uid=uid)
+    command = "DELETE FROM companyusers_affi WHERE uid=:uid;"
+    cursor = g.conn.execute(text(command),uid=uid)
+    return redirect('/')
+
+@app.route('/deletejob/<cid>/<title>')
+@login_required_com
+def deletejob(cid,title):
+    uid = session['uid']
+    command = "DELETE FROM pos_require_skills WHERE cid=:cid and title=:title;"
+    cursor = g.conn.execute(text(command),cid=cid,title=title)
+    command = "DELETE FROM pos_expect_major WHERE cid=:cid and title=:title;"
+    cursor = g.conn.execute(text(command),cid=cid,title=title)
+    command = "DELETE FROM position_liein_post WHERE cid=:cid and title=:title;"
+    cursor = g.conn.execute(text(command),cid=cid,title=title)
+    return redirect(url_for('dashboard_com',uid=uid))
 
 @app.route('/postjob/<cid>/<uid>', methods=['GET','POST'])
 @login_required_com
@@ -409,7 +498,7 @@ def editjob_overview(cid,title):
         hascountry.add(result['country'])
         haslocation.append(result)
     cursor.close()
-    context = dict(cid=cid,uid=uid,tiltle=title, hascity=hascity,hasstate=hasstate,hascountry=hascountry, locationerror=False, dateerror=False)
+    context = dict(cid=cid,uid=uid,title=title, hascity=hascity,hasstate=hasstate,hascountry=hascountry, locationerror=False, dateerror=False)
     if request.method == 'POST':
         appddl = request.form.get('appddl')
         worktype = request.form.get('worktype')
@@ -728,8 +817,10 @@ def add_company():
         newname = form.name.data
         newsize = form.size.data
         newdesciption = form.description.data
+        print "newcid={}".format(newcid)
         flag = check_exist_cid(newcid)
         if not flag:
+            print 'flag={}'.format(flag)
             newcompany = "INSERT INTO company VALUES (:cid,:cname,:size,:description);"
             g.conn.execute(text(newcompany),cid=newcid,cname=newname,size=newsize,description=newdesciption)
             return redirect("/")

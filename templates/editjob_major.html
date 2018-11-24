@@ -1,7 +1,7 @@
 {% extends "bootstrap/base.html" %}
 
 {% block title %}
-Post Job
+Edit Major
 {% endblock %}
 
 {% block styles %}
@@ -30,7 +30,7 @@ Post Job
           <ul class="nav navbar-nav navbar-right">
             <li><a href="/dashboard_com/{{uid}}">Dashboard</a></li>
             <li><a href="/postjob/{{cid}}/{{uid}}">Post Job </a></li>
-            <li><a href="#">Profile</a></li>
+            <li><a href="#">Find Candidate</a></li>
             <li><a href="{{ url_for('logout')}}">Log Out</a></li>
           </ul>
           <form class="navbar-form navbar-right">
@@ -44,10 +44,9 @@ Post Job
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
-            <li><a href="#">Reports</a></li>
-            <li><a href="#">Analytics</a></li>
-            <li><a href="#">Export</a></li>
+            <li><a href="/dashboard_com/{{uid}}">Overview<span class="sr-only">(current)</span></a></li>
+            <li><a href="/editjob/{{ cid }}/{{ title }}">Edit job</a></li>
+            <li class="active"><a href="#">Edit Major</a></li>
           </ul>
           <!-- <ul class="nav nav-sidebar">
             <li><a href="">Nav item</a></li>
@@ -64,7 +63,7 @@ Post Job
         </div>
         <div class="container">
           <form class="form-signin">
-            <h2 class="form-signin-heading">edit major</h2>
+            <h2 class="form-signin-heading">Edit Major</h2>
             <label for="level">level</label>
             <select class="form-control" id="level" name="level">
               <option disabled selected value>level</option>

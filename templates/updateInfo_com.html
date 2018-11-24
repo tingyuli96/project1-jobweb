@@ -1,0 +1,93 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}
+Company User edit profile
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='signin.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='starter-template.css')}}">
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Get Hired</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/dashboard_com/{{uid}}">Dashboard</a></li>
+            <li><a href="/postjob/{{cid}}/{{uid}}">Post Job </a></li>
+            <li><a href="#">Find Candidate</a></li>
+            <li><a href="{{ url_for('logout')}}">Log Out</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><a href="/dashboard_com/{{uid}}">Overview <span class="sr-only">(current)</span></a></li>
+            <li class="active"><a href="/updateInfo_com">Edit Profile</a></li>
+            <li><a href="/editcompany/{{cid}}">Edit Company</a></li>
+            <li><a href="/deleteuser_com">Delete User</a></li>
+          </ul>
+          <!-- <ul class="nav nav-sidebar">
+            <li><a href="">Nav item</a></li>
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+            <li><a href="">More navigation</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+          </ul> -->
+        </div>
+        <!-- <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main"> -->
+
+            <div class="container">
+
+              <form class="form-signin" method="POST" action='/updateInfo_com'>
+                <h2 class="form-signin-heading">Edit Profile</h2>
+            <!--     
+                <label for="uid">UID</label>
+                <input type="number" name="uid" id="uid" class="form-control" placeholder="UID" required autofocus>
+                <label for="Username">Username</label>
+                <input type="text" name="username" id="Username" class="form-control" placeholder="Username" required autofocus>
+                <label for="inputPassword">Password</label>
+                <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required autofocus>
+                <label for="cid">CID</label>
+                <input type="number" name="cid" id="cid" class="form-control" placeholder="Company" requried> -->
+                {{ form.hidden_tag() }}
+                {{ wtf.form_field(form.username) }}
+                {{ wtf.form_field(form.password) }}
+                {% if notvalidcid %}
+                <p>cid not exist</p>
+                <p><a href="/add_company">Go to add your company</a></p>
+                {% endif %}
+                {{ wtf.form_field(form.cid) }}
+                <button class="btn btn-lg btn-primary btn-block" type="submit" formmethod='POST'>Edit Profile</button>
+                </form>
+
+            </div> <!-- /container -->
+        <!-- </div> -->
+    </div>
+</div>
+
+{% endblock %}

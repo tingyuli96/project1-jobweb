@@ -78,7 +78,7 @@ Post Job
             <input type="text" id="title" class="form-control" placeholder="title" name="title" required autofocus>
             <label for="worktype">Work Type</label>
             <select class="form-control" id="worktype" name="worktype" required>
-              <option disabled selected value>>work type</option>
+              <option disabled selected value>--work type--</option>
               <option value="Full-Time Job">Full-Time Job</option>
               <option value="Part-Time Job">Part-Time Job</option>
               <option value="Full-Time Internship">Full-Time Internship</option>
@@ -93,19 +93,19 @@ Post Job
             </script>
             <label for="city">city</label>
             <select class="form-control" id="city" name="city" required>
-              <option disabled selected value>City</option>
+              <option disabled selected value>--City--</option>
               {% for i in hascity %}
               <option value="{{i}}">{{i}}</option>
               {% endfor %}
             </select>
-            <label for="state">State</label>
+            <label for="state">--State--</label>
             <select class="form-control" id="state" name="state" required>
               <option disabled selected value>state</option>
               {% for i in hasstate %}
               <option value="{{i}}">{{i}}</option>
               {% endfor %}
             </select>
-            <label for="country">Country</label>
+            <label for="country">--Country--</label>
             <select class="form-control" id="country" name="country" required>
               <option disabled selected value>country</option>
               {% for i in hascountry %}
