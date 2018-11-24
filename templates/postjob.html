@@ -1,0 +1,124 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Post Job
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<meta charset="utf-8">
+<link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='signin.css')}}">
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Get Hired</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/dashboard_com/{{uid}}">Dashboard</a></li>
+            <li><a href="/postjob/{{cid}}/{{uid}}">Post Job </a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="{{ url_for('logout')}}">Log Out</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Analytics</a></li>
+            <li><a href="#">Export</a></li>
+          </ul>
+          <!-- <ul class="nav nav-sidebar">
+            <li><a href="">Nav item</a></li>
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+            <li><a href="">More navigation</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+          </ul> -->
+        </div>
+        <div class="container">
+          <form class="form-signin">
+            <h2 class="form-signin-heading">Post Job</h2>
+            {% if titleerror %}
+            <p>title already exist, please use another title</p>
+            {% endif %}
+            {% if locationerror %}
+            <p>location does't exist in database, please add or check</p>
+            {% endif %}
+            {% if dateerror %}
+            <p>date formate isn't right</p>
+            {% endif %}
+            <label for="title">Job Title</label>
+            <input type="text" id="title" class="form-control" placeholder="title" name="title" required autofocus>
+            <label for="worktype">Work Type</label>
+            <select class="form-control" id="worktype" name="worktype">
+              <option selected>work type</option>
+              <option value="Full-Time Job">Full-Time Job</option>
+              <option value="Part-Time Job">Part-Time Job</option>
+              <option value="Full-Time Internship">Full-Time Internship</option>
+              <option value="Part-Time Internship">Part-Time Internship</option>
+            </select>
+            <label for="appddl">application deadline</label>
+            <input type="date" id="appddl" class="form-control" placeholder="2018-01-01" name="appddl" required autofocus>
+            <script>
+              $( function() {
+                $( ".simple_date" ).datepicker();
+              } );
+            </script>
+            <label for="city">city</label>
+            <select class="form-control" id="city" name="city">
+              <option selected>City</option>
+              {% for i in hascity %}
+              <option value="{{i}}">{{i}}</option>
+              {% endfor %}
+            </select>
+            <label for="state">State</label>
+            <select class="form-control" id="state" name="state">
+              <option selected>state</option>
+              {% for i in hasstate %}
+              <option value="{{i}}">{{i}}</option>
+              {% endfor %}
+            </select>
+            <label for="country">Country</label>
+            <select class="form-control" id="country" name="country">
+              <option selected>country</option>
+              {% for i in hascountry %}
+              <option value="{{i}}">{{i}}</option>
+              {% endfor %}
+            </select>
+            <p><a href="/addlocation_com/{{cid}}/{{uid}}">Don't see your location? Add here</a></p>
+            <label>description</label>
+            <textarea class="form-control" placeholder="input your description" id="description" rows="3" required autofocus></textarea>
+            <button class="btn btn-lg btn-primary btn-block" type="submit" formmethod="post">Post Job</button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+{% endblock %}
