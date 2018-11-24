@@ -228,10 +228,13 @@ def dashboard_can(uid):
     
     can_job = "select can_apply_pos.title, company.cname from can_apply_pos inner join company on can_apply_pos.cid = company.cid where can_apply_pos.uid = :uid;"
     cursor3 = g.conn.execute(text(can_job),uid=uid)
-    job = ''
+    # job = ''
+    # for result in cursor3:
+    #     job = job + result['cname']+": "
+    #     job = job + result['title'] + ";\n "
+    jobs = []
     for result in cursor3:
-        job = job + result['cname']+": "
-        job = job + result['title'] + ";\n "
+        jobs.append(result)
     cursor3.close()
 
     comm = "select * from can_expect_loc where uid = :uid;"
@@ -243,7 +246,7 @@ def dashboard_can(uid):
         loc = loc + result['country'] + ", "
     cursor4.close()
 
-    context = dict(uid=uid, name=name,university=university,maj=maj, skill_pro=skill_pro,  loc=loc, job=job)
+    context = dict(uid=uid, name=name,university=university,maj=maj, skill_pro=skill_pro,  loc=loc, jobs=jobs)
     return render_template('dashboard_can.html',**context)
 
 @app.route('/dashboard_com/<uid>')
@@ -567,15 +570,14 @@ def add_company():
 
 class updateClass_can(FlaskForm):
     """add company to database"""
-    uid = IntegerField('uid')
     name = StringField('name')
     password = PasswordField('password')
     university = StringField('university')
-    major = StringField('major')
-    skill1 = StringField('skill1')
-    skill2 = StringField('skill2')
-    skill3 = StringField('skill3')
-    preLoc = StringField('prefered location')
+    major = StringField('major(eg: Computer Science,PHD)')
+    skill1 = StringField('skill1(skill name,proficency level(number 1-5, 5 means expert)), eg: Java,3')
+    skill2 = StringField('skill2, eg: Java,5')
+    skill3 = StringField('skill3, eg: Java,5')
+    preLoc = StringField('prefered location(city,state,country, eg: New York,NY,US)')
 
 
 @app.route('/updateInfo_can', methods=['GET', 'POST'])
@@ -584,12 +586,17 @@ def updateInfo_can():
     form = updateClass_can()
     #print 'uid:{}'.format(form.uid.data)
     if form.validate_on_submit():
-        print 'add new user'
+
         newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
-        newname = form.username.data
-        newpassword = form.password.data
-        newuniversity = form.university.data
-        flag = check_exist_uid(newuid)
+        newName = form.name.data
+        newPassword = form.password.data
+        newUniversity = form.university.data
+        newMajor = form.major.data
+        newPreLoc = form.preLoc.data
+        newSkill1 = form.skill1.data
+        newSkill2 = form.skill2.data
+        newSkill3 = form.skill3.data
+
         if not flag:
             g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
                            password = newpassword, university = newuniversity);
