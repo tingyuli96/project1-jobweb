@@ -20,9 +20,6 @@ from wtforms import StringField, TextAreaField, PasswordField, SelectField, Bool
 from wtforms.validators import InputRequired,  DataRequired, Length, NumberRange
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from datetime import date
-from sets import Set
-import re
 # tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 # app = Flask(__name__, template_folder=tmpl_dir)
 app = Flask(__name__)
@@ -94,11 +91,6 @@ class AddFormCompany(FlaskForm):
     name = StringField('name',validators=[InputRequired()])
     size = SelectField('size',choices=[('1','1-10'),('2','10-50'),('3','50-100'),('4','100-250'),('5','250-1000'),('6','1000-5000'),('7','5000-10000'),('8','10000-25000'),('9','25000+')])
     description = TextAreaField('description')
-
-class PostPosition(FlaskForm):
-    """docstring for PostPosition"""
-    worktype = SelectField('worktype')
-        
 
 # class CandidateProfile():
 #     def __init__(self):
@@ -263,8 +255,7 @@ def dashboard_com(uid):
         size = sizedic[str(result['size'])]
         description = result['description']
     cursor2.close()
-    command = "SELECT title, posttime FROM position_liein_post WHERE cid = :cid and uid = :uid;"
-    cursor3 = g.conn.execute(text(command),cid=cid,uid=uid)
+    cursor3 = g.conn.execute("SELECT title, posttime FROM position_liein_post WHERE cid = {} and uid = {};".format(cid,uid))
     jobs = []
     for result in cursor3:
         jobs.append(result)
@@ -272,97 +263,7 @@ def dashboard_com(uid):
     context = dict(uid=uid, name=name,cid=cid,cname=cname,size=size,description=description,jobs=jobs)
     return render_template('dashboard_com.html',**context)
 
-@app.route('/postjob/<cid>/<uid>', methods=['GET','POST'])
-@login_required_com
-def postjob(cid,uid):
-    cursor = g.conn.execute("SELECT * FROM location")
-    hascity = Set()
-    hasstate = Set()
-    hascountry = Set()
-    haslocation = []
-    for result in cursor:
-        hascity.add(result['city'])
-        hasstate.add(result['state'])
-        hascountry.add(result['country'])
-        haslocation.append(result)
-    cursor.close()
-    context = dict(cid=cid,uid=uid,hascity=hascity,hasstate=hasstate,hascountry=hascountry, locationerror=False, titleerror=False, dateerror=False)
-    if request.method == 'POST':
-        title = request.form.get('title')
-        appddl = request.form.get('appddl')
-        worktype = request.form.get('worktype')
-        description = request.form.get('description')
-        city = request.form.get('city')
-        state = request.form.get('state')
-        country = request.form.get('country')
-        posttime = str(date.today())
-        # check if appdl is the right formate
-        dateformateflag = re.match(r"\d{4}-\d{2}-\d{2}",appddl) #return True if match
-        monthflag = False 
-        dateflag = False
-        if dateformateflag:
-            month = int(re.search(r"(?<=\d{4}-)\d{2}",appddl).group(0)) 
-            if month > 0 and month < 13:
-                monthflag = True
-            day = int(re.search(r"\d{2}$",appddl).group(0))
-            if day > 0 and day < 31:
-                dateflag = True
-        validdate = dateformateflag and monthflag and dateflag
-        # get exist title of this cid
-        cursor = g.conn.execute("SELECT title from position_liein_post WHERE cid={}".format(cid))
-        hastitle = []
-        for result in cursor:
-            hastitle.append(result['title'])
-        print 'posttime:{}'.format(posttime)
-        if (city,state,country) in haslocation and title not in hastitle and validdate:
-            command = "INSERT INTO position_liein_post VALUES(:cid,:uid,:country,:state,:city,:title,:description,:worktype,:appddl,:posttime);"
-            cursor = g.conn.execute(text(command),cid=cid,uid=uid,country=country,state=state,city=city,title=title,description=description,worktype=worktype,appddl=appddl,posttime=posttime)
-            cursor.close()
-            return redirect(url_for('editjob',cid=cid,title=title))
-        if title in hastitle:
-            print '--------title exist-------------'
-            context['titleerror'] = True
-        if (city,state,country) not in haslocation:
-            context['locationerror'] = True
-        if not validdate:
-            context['dateerror'] = True
-        return render_template('postjob.html',**context)
 
-        return render_template('postjob.html',**context)
-    return render_template('/postjob.html',**context)
-
-@app.route('/addlocation_com/<cid>/<uid>', methods = ['GET','POST'])
-def addlocation_com(cid,uid):
-    if request.method == 'POST':
-        city = request.form.get('city')
-        state = request.form.get('state')
-        country = request.form.get('country')
-        cursor = g.conn.execute("SELECT * FROM location")
-        hascity = Set()
-        hasstate = Set()
-        hascountry = Set()
-        for result in cursor:
-            hascity.add(result['city'])
-            hasstate.add(result['state'])
-            hascountry.add(result['country'])
-        cursor.close()
-        if city not in hascity or state not in hasstate or country not in hascountry:
-            command = "INSERT INTO location VALUES (:city,:state,:country);"
-            cursor = g.conn.execute(text(command),city=city,state=state,country=country);
-            cursor.close()
-            return redirect(url_for('postjob',cid=cid,uid=uid))
-        else:
-            return render_template('addlocation.html', error=True)
-
-    return render_template('addlocation.html', error=False)
-
-
-
-
-@app.route('/editjob/<cid>/<title>')
-@login_required_com
-def editjob(cid,title):
-    return render_template('editjob.html')
 
 
 #credit to https://github.com/realpython/discover-flas
@@ -547,7 +448,7 @@ def add_company():
 
 class updateClass_can(FlaskForm):
     """add company to database"""
-    uid = IntegerField('uid',validators=[InputRequired()])
+    uid = IntegerField('uid')
     name = StringField('name')
     password = PasswordField('password')
     university = StringField('university')
@@ -555,17 +456,17 @@ class updateClass_can(FlaskForm):
     skill1 = StringField('skill1')
     skill2 = StringField('skill2')
     skill3 = StringField('skill3')
+    preLoc = StringField('prefered location')
 
 
 @app.route('/updateInfo_can', methods=['GET', 'POST'])
 @login_required_com
 def updateInfo_can():
     form = updateClass_can()
-    print 'uid:{}'.format(form.uid.data)
+    #print 'uid:{}'.format(form.uid.data)
     if form.validate_on_submit():
         print 'add new user'
         newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
-        newuid = form.uid.data
         newname = form.username.data
         newpassword = form.password.data
         newuniversity = form.university.data
