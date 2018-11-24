@@ -328,8 +328,6 @@ def postjob(cid,uid):
         if not validdate:
             context['dateerror'] = True
         return render_template('postjob.html',**context)
-
-        return render_template('postjob.html',**context)
     return render_template('/postjob.html',**context)
 
 
@@ -362,7 +360,6 @@ def addlocation_com(cid,uid):
 # def editprofile_com(cid,uid):
 
 
-
 @app.route('/editjob/<cid>/<title>')
 @login_required_com
 def editjob(cid,title):
@@ -370,20 +367,24 @@ def editjob(cid,title):
     show the overview of the job and edit on the end of list
     other uid can edie too
     """
-    cursor = g.conn.execute("SELECT * FROM position_liein_post where cid = {} and title = {};".format(cid,title))
+    uid = session['uid']
+    cursor = g.conn.execute("SELECT * FROM company WHERE cid = {};".format(cid))
+    for result in cursor:
+        company = result
+    cursor = g.conn.execute("SELECT * FROM position_liein_post where cid = {} and title = '{}';".format(cid,title))
     for result in cursor:
         position = result
     cursor.close()
-    cursor = g.conn.execute("SELECT * FROM pos_require_skills where cid = {} and title = {};".format(cid,title))
+    cursor = g.conn.execute("SELECT * FROM pos_require_skills where cid = {} and title = '{}';".format(cid,title))
     skills = []
     for result in cursor:
         skills.append(result)
     cursor.close()
-    cursor = g.conn.execute("SELECT * FROM pos_expect_major where cid = {} and title = {}".format(cid,title))
+    cursor = g.conn.execute("SELECT * FROM pos_expect_major where cid = {} and title = '{}'".format(cid,title))
     majors = []
     for result in cursor:
         majors.append(result)
-    context = dict(position = position, skills = skills, majors = majors)
+    context = dict(uid=uid, company = company, position = position, skills = skills, majors = majors)
     return render_template('editjob.html', **context)
 
 
