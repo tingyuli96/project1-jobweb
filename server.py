@@ -579,8 +579,14 @@ class updateClass_can(FlaskForm):
     preLoc = StringField('prefered location(city,state,country, eg: New York,NY,US)')
 
 
+
+# @app.route('/editjob/<cid>/<title>')
+# @login_required_com
+# def editjob(cid,title):
+
+
 @app.route('/updateInfo_can', methods=['GET', 'POST'])
-@login_required_com
+@login_required_can
 def updateInfo_can():
     form = updateClass_can()
     #print 'uid:{}'.format(form.uid.data)
@@ -595,6 +601,8 @@ def updateInfo_can():
         newSkill1 = form.skill1.data
         newSkill2 = form.skill2.data
         newSkill3 = form.skill3.data
+        # if newName != '':
+
 
         if not flag:
             g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
