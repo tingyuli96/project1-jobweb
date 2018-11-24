@@ -63,13 +63,19 @@ Dashboard
     <div class="container">
 
       <form class="form-signin" method='POST' action="/updateInfo_can">
-        <h2 class="form-signin-heading">update Information Candidate</h2>
+        <h2 class="form-signin-heading">Update Information Candidate</h2>
         {{ form.hidden_tag() }}
         {% if notvaliduid %}
         <p>uid already used</p>
         {% endif %}
-        {{ wtf.form_field(form.uid) }}
         {{ wtf.form_field(form.name) }}
+        {{ wtf.form_field(form.password) }}
+        {{ wtf.form_field(form.university) }}
+        {{ wtf.form_field(form.major) }}
+        {{ wtf.form_field(form.preLoc) }}
+        {{ wtf.form_field(form.skill1) }}
+        {{ wtf.form_field(form.skill2) }}
+        {{ wtf.form_field(form.skill3) }}
         <button class="btn btn-lg btn-primary btn-block" type="submit">update</button>
       </form>
 

@@ -448,7 +448,6 @@ def add_company():
 
 class updateClass_can(FlaskForm):
     """add company to database"""
-    uid = IntegerField('uid')
     name = StringField('name')
     password = PasswordField('password')
     university = StringField('university')
@@ -465,12 +464,17 @@ def updateInfo_can():
     form = updateClass_can()
     #print 'uid:{}'.format(form.uid.data)
     if form.validate_on_submit():
-        print 'add new user'
+
         newcandidate = 'INSERT INTO Candidate VALUES (:uid,:name,:password,:university)';
-        newname = form.username.data
-        newpassword = form.password.data
-        newuniversity = form.university.data
-        flag = check_exist_uid(newuid)
+        newName = form.name.data
+        newPassword = form.password.data
+        newUniversity = form.university.data
+        newMajor = form.major.data
+        newPreLoc = form.preLoc.data
+        newSkill1 = form.skill1.data
+        newSkill2 = form.skill2.data
+        newSkill3 = form.skill3.data
+
         if not flag:
             g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
                            password = newpassword, university = newuniversity);
