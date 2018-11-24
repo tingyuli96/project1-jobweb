@@ -365,16 +365,16 @@ def editjob(cid,title):
     show the overview of the job and edit on the end of list
     other uid can edie too
     """
-    cursor = g.conn.execute("SELECT * FROM position_liein_post where cid = {} and title = {};".format(cid,title))
+    cursor = g.conn.execute("SELECT * FROM position_liein_post where cid = {} and title = '{}';".format(cid,title))
     for result in cursor:
         position = result
     cursor.close()
-    cursor = g.conn.execute("SELECT * FROM pos_require_skills where cid = {} and title = {};".format(cid,title))
+    cursor = g.conn.execute("SELECT * FROM pos_require_skills where cid = {} and title = '{}';".format(cid,title))
     skills = []
     for result in cursor:
         skills.append(result)
     cursor.close()
-    cursor = g.conn.execute("SELECT * FROM pos_expect_major where cid = {} and title = {}".format(cid,title))
+    cursor = g.conn.execute("SELECT * FROM pos_expect_major where cid = {} and title = '{}'".format(cid,title))
     majors = []
     for result in cursor:
         majors.append(result)
