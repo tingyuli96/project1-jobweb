@@ -56,7 +56,7 @@ engine = create_engine(DATABASEURI)
 def login_required_can(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'logged_in' in session:
+        if 'uid' in session:
             return f(*args, **kwargs)
         else:
             #flash('hey yo login first')
@@ -66,7 +66,7 @@ def login_required_can(f):
 def login_required_com(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'logged_in' in session:
+        if 'uid' in session:
             return f(*args, **kwargs)
         else:
             #flash('hey yo login first')
@@ -197,7 +197,11 @@ def teardown_request(exception):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if 'uid' in session:
+        uid = session['uid']
+        return render_template('index.html',uid=uid)
+    else:
+        return render_template('index.html',uid=None)
 
 
 @app.route('/dashboard_can/<uid>')
@@ -357,14 +361,14 @@ def addlocation_com(cid,uid):
 
     return render_template('addlocation.html', uid = uid, error=False)
 
-@app.route('/editprofile_com/<cid>/<uid>', methods = ['GET','POST'])
-def editprofile_com(cid,uid):
+# @app.route('/editprofile_com/<cid>/<uid>', methods = ['GET','POST'])
+# def editprofile_com(cid,uid):
 
 
 
-@app.route('/editjob/<cid>/<uid>/<title>')
+@app.route('/editjob/<cid>/<title>')
 @login_required_com
-def editjob(cid,uid,title):
+def editjob(cid,title):
     """
     show the overview of the job and edit on the end of list
     other uid can edie too
@@ -411,7 +415,7 @@ def login_can():
                 print("password:", row['password'])
 
             if m[0] == password:
-                session['logged_in'] = True
+                session['uid'] = request.form['uid']
                 return redirect(url_for('dashboard_can',uid=uid))
             else:
                 error = 'Invalid login_can. Please try again.'
@@ -450,7 +454,7 @@ def login_com():
                 print("password:", row['password'])
 
             if m[0] == password:
-                session['logged_in'] = True
+                session['uid'] = request.form['uid']
                 return redirect(url_for('dashboard_com',uid=uid))
             else:
                 error = 'Invalid login_com. Please try again.'
@@ -466,7 +470,7 @@ def login_com():
 
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None)
+    session.pop('uid', None)
     return redirect(url_for('index'))
 
 @app.route('/signup_candidate', methods=['GET', 'POST'])

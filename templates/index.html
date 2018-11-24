@@ -19,27 +19,33 @@ Get Hired
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Get Hired</a>
+          <a class="navbar-brand" href="/">Get Hired</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
+            <li class="active"><a href="/">Home</a></li>
             <li><a href="{{ url_for('login_can') }}">Candidate Login</a></li>
             <li><a href="{{ url_for('login_com') }}">CompanyUser Login</a></li>
             <li><a href="{{ url_for('signup_candidate') }}">Candidate Sign Up</a></li>
             <li><a href="{{ url_for('signup_company')}}">CompanyUser Sign Up</a></li>
             <li><a href="{{ url_for('add_company')}}">Add Company</a></li>
+            {% if uid %}
+            <li><a href="{{ url_for('logout')}}">Log Out</a></li>
+            {% endif %}
+            <li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
 
     <div class="container">
-        <!--
+        
       <div class="starter-template">
-        <h1>Bootstrap starter template</h1>
-        <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
+        <h1>Welcom to Get Hired</h1>
+        {% if uid %}
+        <p class="lead">{{uid}}</p>
+        {% endif %}
       </div>
-        -->
+        
     </div><!-- /.container -->
 {% endblock %}
