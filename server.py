@@ -1073,7 +1073,10 @@ class updateClass_can(FlaskForm):
 # @app.route('/editjob/<cid>/<title>')
 # @login_required_com
 # def editjob(cid,title):
-
+@app.route('/delete_can', methods=['GET', 'POST'])
+@login_required_can
+def delete_can():
+    return redirect("/")
 
 @app.route('/updateInfo_can', methods=['GET', 'POST'])
 @login_required_can
