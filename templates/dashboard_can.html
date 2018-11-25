@@ -125,6 +125,7 @@ Dashboard
               <thead>
                 <tr>
                   <th>#</th>
+                  <th>cid</th>
                   <th>Company</th>
                   <th>Job title</th>
                   <th>Applied Time</th>
@@ -134,10 +135,11 @@ Dashboard
                 {% for job in jobs %}
                 <tr>
                   <td>{{loop.index}}</td>
+                  <td>{{job['cid']}}</td>
                   <td>{{job['cname']}}</td>
                   <td>{{job['title']}}</td>
                   <td>{{job['applytime']}}</td>
-                  <td><a href="/editjob/{{cid}}/{{job['title']}}" class="btn btn-default">Edit</a></td>
+                  <td><a href="/deleteAppliedJob/{{cid}}" class="btn btn-default">Delete</a></td>
                 </tr>
                 {% endfor %}
                 
