@@ -1069,14 +1069,35 @@ class updateClass_can(FlaskForm):
     preLoc = StringField('prefered location(city,state,country, nospace, eg: New York,NY,US)')
 
 
-
+class delete_can_class(FlaskForm):
+    """add company to database"""
+    uid = IntegerField('uid',validators=[InputRequired()])
 # @app.route('/editjob/<cid>/<title>')
 # @login_required_com
 # def editjob(cid,title):
 @app.route('/delete_can', methods=['GET', 'POST'])
 @login_required_can
 def delete_can():
-    return redirect("/")
+    form = delete_can_class()
+    uid = session['uid']
+    if form.validate_on_submit():
+        newuid = form.uid.data
+        print uid, newuid
+        print str(uid)==str(newuid)
+        if str(uid)==str(newuid):
+            session.pop('uid', None)
+            comm = "delete from can_apply_pos where uid=:uid;"
+            g.conn.execute(text(comm), uid=uid)
+            comm = "delete from can_expect_loc where uid=:uid;"
+            g.conn.execute(text(comm), uid=uid)
+            comm = "delete from can_has_major where uid=:uid;"
+            g.conn.execute(text(comm), uid=uid)
+            comm = "delete from can_has_skills where uid=:uid;"
+            g.conn.execute(text(comm), uid=uid)
+            comm = "delete from candidate where uid=:uid;"
+            g.conn.execute(text(comm), uid=uid)
+            return redirect("/")
+    return render_template('/delete_can.html', form=form, notvaliduser = False)
 
 @app.route('/updateInfo_can', methods=['GET', 'POST'])
 @login_required_can
@@ -1104,6 +1125,7 @@ def updateInfo_can():
             l = [] # skill in table skill
             for result in cursor:
                 l.append(result)
+            #bug here, if the person has no major data in the database
             if len(l)>0:
                 comm = "update can_has_major set mname =:newmname, level=:newlevel where uid =:uid;"
                 g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel, uid=uid)
