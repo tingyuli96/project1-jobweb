@@ -176,9 +176,10 @@ def index():
         return render_template('index.html',uid=None)
 
 
-@app.route('/dashboard_can/<uid>')
+@app.route('/dashboard_can')
 @login_required_can
-def dashboard_can(uid):
+def dashboard_can():
+    uid = session['uid']
     getcandidate = "SELECT * FROM candidate WHERE uid=:uid;"
     cursor = g.conn.execute(text(getcandidate),uid=uid)
     for result in cursor:
