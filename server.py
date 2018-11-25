@@ -819,6 +819,16 @@ def deletejob_major(cid,title,mname):
 
 
 
+
+@app.route('/deleteAppliedJob/<cid>/<title>')
+@login_required_can
+def deleteAppliedJob(cid,title):
+    uid = session['uid']
+    command = "DELETE FROM can_apply_pos WHERE uid=:uid, cid=:cid and title=:title;"
+    cursor = g.conn.execute(text(command),uid=uid, cid=cid,title=title)
+    return redirect(url_for('dashboard_can'))
+
+
 #credit to https://github.com/realpython/discover-flas
 @app.route('/login_can', methods=['GET', 'POST'])
 def login_can():
@@ -845,7 +855,7 @@ def login_can():
 
             if m[0] == password:
                 session['uid'] = request.form['uid']
-                return redirect(url_for('dashboard_can',uid=uid))
+                return redirect(url_for('dashboard_can'))
             else:
                 error = 'Invalid login_can. Please try again.'
                 return render_template('login_can.html', error=error)
@@ -1085,28 +1095,14 @@ def updateInfo_can():
                     comm = "insert into Can_Has_Skills (uid, sname, proficiency) values (:uid, :sname, :pro);"
                     g.conn.execute(text(comm), uid=uid, sname=s, pro=p)
 
-
-
-
-        
-
-        # if not flag:
-        #     g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
-        #                    password = newpassword, university = newuniversity);
-        #     return redirect(url_for('login_can'))
-        # else:
-        #     return render_template('/updateinfo_can.html', form=form, notvaliduser = True)
     return render_template('/updateinfo_can.html', form=form, notvaliduser = False)
 
 
 
 
-@app.route('/deleteAppliedJob/<cid>/<title>', methods=['GET', 'POST'])
-@login_required_can
-def deleteAppliedJob(cid,tilte):
-    uid = session['uid']
-    comm = "delete from can_apply_pos where uid =:uid and cid=:cid and title=:title;"
-    g.conn.execute(text(comm), uid=uid, cid=cid, title=title)
+
+
+
 
 """
 if __name__ == '__main__':
@@ -1119,7 +1115,7 @@ if __name__ == "__main__":
     @click.option('--debug', is_flag=True)
     @click.option('--threaded', is_flag=True)
     @click.argument('HOST', default='0.0.0.0')
-    @click.argument('PORT', default=5000, type=int)
+    @click.argument('PORT', default=8000, type=int)
     def run(debug, threaded, host, port):
         """
         This function handles command line parameters.

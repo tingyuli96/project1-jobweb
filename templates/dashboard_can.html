@@ -139,7 +139,7 @@ Dashboard
                   <td>{{job['cname']}}</td>
                   <td>{{job['title']}}</td>
                   <td>{{job['applytime']}}</td>
-                  <td><a href="/deleteAppliedJob/{{cid}}/{{job['title']}}" class="btn btn-default">Delete</a></td>
+                  <td><a href="/deleteAppliedJob/{{job['cid']}}/{{job['title']}}" class="btn btn-default">Delete</a></td>
                 </tr>
                 {% endfor %}
                 
