@@ -1,0 +1,203 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Get Hired</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/dashboard_can">Dashboard</a></li>
+            <li><a href="{{ url_for('logout')}}">Log Out</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+          <!-- <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+          </div> -->
+
+          <h2 class="header">{{ position['title'] }}</h2>
+          <h3 class="header">Company: {{ cname }}</h3>
+          <small>post time: {{ position['posttime'] }}</small>
+          <h4 class="sub-header">Overview</h4>
+          <div class="table-responsive">
+            <table class="table table-striped">
+<!--               <thead>
+                <tr>
+                  <th>Overview</th>
+                </tr>
+              </thead> -->
+              <tbody>
+                <tr>
+                  <td>worktype</td>
+                  <td>
+                    {{ position['worktype'] }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>application deadline</td>
+                  <td>
+                    {{ position['appddl'] }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>city</td>
+                  <td>
+                    {{ position['city'] }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>state</td>
+                  <td>
+                    {{ position['state'] }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>country</td>
+                  <td>{{ position['country'] }}</td>
+                </tr>
+                <tr>
+                  <td>description</td>
+                  <td>{{ position['description'] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h4 class="sub-header">required skills</h4>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>skills</th>
+                  <th>proficiency</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for skill in skills %}
+                <tr>
+                  <td>{{ loop.index }}</td>
+                  <td>{{ skill['sname'] }}</td>
+                  <td>{{ skill['proficiency']}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <h4 class="sub-header">expected major</h4>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>major</th>
+                  <th>level</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for major in majors %}
+                <tr>
+                  <td>{{ loop.index }}</td>
+                  <td>{{ major['mname'] }}</td>
+                  <td>{{ major['level']}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-responsive">
+            <h4 class="sub-header">Contact Person</h4>
+            <table class="table table-striped">
+<!--               <thead>
+                <tr>
+                  <th>Personal Information</th>
+                </tr>
+              </thead> -->
+              <tbody>
+                <tr>
+                  <td>uid</td>
+                  <td>{{recruiter['uid']}}</td>
+                </tr>
+                <tr>
+                  <td>name</td>
+                  <td>{{recruiter['name']}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-responsive">
+            <h4 class="sub-header">Company</h4>
+            <table class="table table-striped">
+<!--               <thead>
+                <tr>
+                  <th>Personal Information</th>
+                </tr>
+              </thead> -->
+              <tbody>
+                <tr>
+                  <td>cid</td>
+                  <td>{{cid}}</td>
+                </tr>
+                <tr>
+                  <td>company</td>
+                  <td>{{cname}}</td>
+                </tr>
+                <tr>
+                  <td>size</td>
+                  <td>{{size}}</td>
+                </tr>
+                <tr>
+                  <td>description</td>
+                  <td>{{description}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}

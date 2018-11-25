@@ -40,6 +40,7 @@ Dashboard
         </div> -->
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <!-- <h1 class="page-header">Welcome, {{name}}</h1> -->
+          <div class="table-responsive">
           <form class="form-inline">
             <label class="sr-only" for="inlineFormInput">title</label>
             <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" id="inlineFormInput" placeholder="title" name="title">
@@ -59,10 +60,13 @@ Dashboard
             </label>
             <button type="submit" class="btn btn-primary" formmethod="post">Submit</button>
           </form>
-          <div class="table-responsive">
+        </div>
           {% for job in joblist %}
           <h4 class="header">{{ job['title'] }}</h4>
-            <table class="table table-striped">
+ <!--          <div class="table-responsive">
+            <table class="table table-striped"> -->
+            <div>
+              <table class="table">
               <thead>
                 <tr>
                   <th><a href="/job_overview/{{job['cid']}}/{{job['title']}}">More</a></th>
@@ -91,8 +95,8 @@ Dashboard
                 </tr>
               </tbody>
             </table>
-            {% endfor %}
           </div>
+          {% endfor %}
         </div>
       </div>
     </div>
