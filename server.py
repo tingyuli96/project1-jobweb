@@ -776,7 +776,8 @@ def addjob_skill(cid,title):
     """
     add skill to pos_require_skills
     """
-    context = dict(cid=cid,title=title,nameerror=False)
+    uid = session['uid']
+    context = dict(uid=uid, cid=cid,title=title,nameerror=False)
     if request.method == 'POST':
         skills = {}
         sname = request.form.get('sname')
@@ -808,7 +809,8 @@ def addjob_skill(cid,title):
 @app.route('/editjob_skill/<cid>/<title>/<sname>', methods = ['GET','POST'])
 @login_required_com
 def editjob_skill(cid,title,sname):
-    context = dict(cid=cid,title=title,sname=sname)
+    uid = session['uid']
+    context = dict(uid=uid,cid=cid,title=title,sname=sname)
     if request.method == 'POST':
         proficiency =  request.form.get("proficiency")
         command = "UPDATE pos_require_skills SET proficiency = :proficiency WHERE cid=:cid and title=:title and sname=:sname;"
@@ -831,7 +833,8 @@ def addjob_major(cid,title):
     """
     add skill to pos_require_skills
     """
-    context = dict(cid=cid,title=title,nameerror=False)
+    uid = session['uid']
+    context = dict(uid=uid,cid=cid,title=title,nameerror=False)
     if request.method == 'POST':
         majors = {}
         mname = request.form.get('mname')
@@ -863,7 +866,8 @@ def addjob_major(cid,title):
 @app.route('/editjob_major/<cid>/<title>/<mname>', methods = ['GET','POST'])
 @login_required_com
 def editjob_major(cid,title,mname):
-    context = dict(cid=cid,title=title,mname=mname)
+    uid = session['uid']
+    context = dict(uid=uid,cid=cid,title=title,mname=mname)
     if request.method == 'POST':
         level =  request.form.get("level")
         command = "UPDATE pos_expect_major SET level = :level WHERE cid=:cid and title=:title and mname=:mname;"
