@@ -176,9 +176,10 @@ def index():
         return render_template('index.html',uid=None)
 
 
-@app.route('/dashboard_can/<uid>')
+@app.route('/dashboard_can')
 @login_required_can
-def dashboard_can(uid):
+def dashboard_can():
+    uid = session['uid']
     getcandidate = "SELECT * FROM candidate WHERE uid=:uid;"
     cursor = g.conn.execute(text(getcandidate),uid=uid)
     for result in cursor:
@@ -887,10 +888,8 @@ class updateClass_can(FlaskForm):
     password = PasswordField('password')
     university = StringField('university')
     major = StringField('major(eg: Computer Science,PHD)')
-    skill1 = StringField('skill1(skill name,proficiency level(number 1-5, 5 means expert)), eg: Java,3')
-    skill2 = StringField('skill2, eg: Java,5')
-    skill3 = StringField('skill3, eg: Java,5')
-    preLoc = StringField('prefered location(city,state,country, eg: New York,NY,US)')
+    skill = StringField('skill(skill name,proficiency level(number 1-5, 5 means expert); no space, eg: Java,3;Python,5;)')
+    preLoc = StringField('prefered location(city,state,country, nospace, eg: New York,NY,US)')
 
 
 
@@ -910,14 +909,68 @@ def updateInfo_can():
         newUniversity = form.university.data
         newMajor = form.major.data
         newPreLoc = form.preLoc.data
-        newSkill1 = form.skill1.data
-        newSkill2 = form.skill2.data
-        newSkill3 = form.skill3.data
+        newSkill = form.skill.data
+        
         if newPassword != '':
             comm = "update candidate set password =:newPassword where uid =:uid; "
             g.conn.execute(text(comm), uid=uid, newPassword=newPassword)
+        if newUniversity != '':
+            comm = "update candidate set university =:newUniversity where uid =:uid; "
+            g.conn.execute(text(comm), uid=uid, newUniversity=newUniversity)
+        if newMajor != '':
+            newmname, newlevel = newMajor.split(',') 
+            comm = "SELECT * FROM major where mname=:mname"
+            cursor = g.conn.execute(text(comm), mname=newmname)
+            l = [] # skill in table skill
+            for result in cursor:
+                l.append(result)
+            if len(l)>0:
+                comm = "update can_has_major set mname =:newmname, level=:newlevel where uid =:uid;"
+                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel, uid=uid)
+            else:
+                comm = "insert into Major (mname) values (:major);"
+                g.conn.execute(text(comm), major=newmname)
+                comm = "update can_has_major set mname =:newmname, level=:newlevel where uid =:uid;"
+                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel,uid=uid)
+        if newPreLoc != '':
+            newcity, newstate, newcountry  = newPreLoc.split(',')
+            comm = "SELECT * FROM location where city=:city"
+            cursor = g.conn.execute(text(comm), city=newcity)
+            l = [] # skill in table skill
+            for result in cursor:
+                l.append(result)
+            if len(l)>0:
+                comm = "update can_expect_loc set city =:city, state =:state, country=:country where uid =:uid;"
+                g.conn.execute(text(comm), uid=uid, city=newcity, state=newstate, country=newcountry)
+            else:
+                comm = "insert into Location (city, state, country) values (:city, :state, :country);"
+                g.conn.execute(text(comm), city=newcity, state=newstate, country=newcountry)
+                comm = "update can_expect_loc set city =:city, state =:state, country=:country where uid =:uid;"
+                g.conn.execute(text(comm), uid=uid, city=newcity, state=newstate, country=newcountry)
+        if newSkill != '':
+            comm = "delete from can_has_skills where uid=:uid;"
+            g.conn.execute(text(comm), uid=uid)
+            sList = newSkill.split(';')
+            for i in range(len(sList)):
+                s, p = sList[i].split(',')
+                comm = "SELECT * FROM skills where sname=:sname"
+                cursor = g.conn.execute(text(comm), sname=s)
+                l = [] # skill in table skill
+                for result in cursor:
+                    l.append(result)
+                if len(l)>0:
+                    comm = "insert into Can_Has_Skills (uid, sname, proficiency) values (:uid, :sname, :pro);"
+                    g.conn.execute(text(comm), uid=uid, sname=s, pro=p)
+                else:
+                    comm = "insert into Skills (sname) values (:sname);"
+                    g.conn.execute(text(comm), sname=s)
+                    comm = "insert into Can_Has_Skills (uid, sname, proficiency) values (:uid, :sname, :pro);"
+                    g.conn.execute(text(comm), uid=uid, sname=s, pro=p)
 
 
+
+
+        
 
         # if not flag:
         #     g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
