@@ -106,42 +106,6 @@ class UpdateFormCompany(FlaskForm):
     name = StringField('name',validators=[InputRequired()])
     size = SelectField('size',choices=[('1','1-10'),('2','10-50'),('3','50-100'),('4','100-250'),('5','250-1000'),('6','1000-5000'),('7','5000-10000'),('8','10000-25000'),('9','25000+')])
     description = TextAreaField('description')
-# class CandidateProfile():
-#     def __init__(self):
-#         uid = None
-#         name = None
-#         password = None
-#         university = None
-#         skills = {} #key:skill name, value: proficiency
-#         majors = {} #key: name, value: level
-#         applyjobs = [] #(cid,title)
-
-#     def setuid(self,uid):
-#         self.uid = uid
-
-#     def setname(self,name):
-#         self.name = name
-
-#     def setpassword(self,password):
-#         self.password = password
-
-#     def setuniversity(self,university):
-#         self.university = university
-
-#     def addskills(self,skill,proficiency):
-#         self.skills[skill] = proficiency
-
-#     def addmajors(self,major,level):
-#         self.majors[major] = level
-
-#     def addapplyjobs(self,cid,title):
-#         applyjobs.append((cid,title))
-
-#     def name(self):
-#         print self.name
-#         return self.name
-
-
 
 def check_exist_uid(uid):
     """
