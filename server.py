@@ -1078,12 +1078,14 @@ def add_company():
     return render_template('/add_company.html',form=form, notvalidcid=False)
 
 
+
 class updateClass_can(FlaskForm):
     """add company to database"""
     password = PasswordField('password')
     university = StringField('university')
-    major = StringField('major(eg: Computer Science,PHD)')
-    skill = StringField('skill(skill name,proficiency level(number 1-5, 5 means expert); no space, eg: Java,3;Python,5;)')
+    major = StringField('major(eg: Computer Science)')
+    majorLevel = SelectField('major level, please input your major at the same time',choices=[('Bachelor','Bachelor'),('Master','Master'),('PHD','PHD')])
+    skill = StringField('skill(skill name,proficiency level(number 1-5, 5 means expert); no space, eg: Java,3;Python,5)')
     preLoc = StringField('prefered location(city,state,country, nospace, eg: New York,NY,US)')
 
 
@@ -1127,6 +1129,7 @@ def updateInfo_can():
         newPassword = form.password.data
         newUniversity = form.university.data
         newMajor = form.major.data
+        newMajorLevel = form.majorLevel.data
         newPreLoc = form.preLoc.data
         newSkill = form.skill.data
         
@@ -1136,8 +1139,10 @@ def updateInfo_can():
         if newUniversity != '':
             comm = "update candidate set university =:newUniversity where uid =:uid; "
             g.conn.execute(text(comm), uid=uid, newUniversity=newUniversity)
-        if newMajor != '':
-            newmname, newlevel = newMajor.split(',') 
+        if newMajor != '' and newMajorLevel !='':
+            # newmname, newlevel = newMajor.split(',') 
+            newmname = newMajor
+            newlevel = newMajorLevel
             comm = "SELECT * FROM major where mname=:mname"
             cursor = g.conn.execute(text(comm), mname=newmname)
             l = [] # skill in table skill
