@@ -824,7 +824,7 @@ def deletejob_major(cid,title,mname):
 @login_required_can
 def deleteAppliedJob(cid,title):
     uid = session['uid']
-    command = "DELETE FROM can_apply_pos WHERE uid=:uid, cid=:cid and title=:title;"
+    command = "DELETE FROM can_apply_pos WHERE uid=:uid and cid=:cid and title=:title;"
     cursor = g.conn.execute(text(command),uid=uid, cid=cid,title=title)
     return redirect(url_for('dashboard_can'))
 
