@@ -831,20 +831,36 @@ def updateInfo_can():
             comm = "update candidate set university =:newUniversity where uid =:uid; "
             g.conn.execute(text(comm), uid=uid, newUniversity=newUniversity)
         if newMajor != '':
-            newmname, newlevel = newMajor.split('.') 
+            newmname, newlevel = newMajor.split(',') 
             comm = "SELECT * FROM major where mname=:mname"
-            cursor = g.conn.execute(comm, mname=newmname)
+            cursor = g.conn.execute(text(comm), mname=newmname)
             l = [] # skill in table skill
             for result in cursor:
                 l.append(result)
             if len(l)>0:
                 comm = "update can_has_major set mname =:newmname, level=:newlevel where uid =:uid;"
-                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel)
+                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel, uid=uid)
             else:
                 comm = "insert into Major (mname) values (:major);"
                 g.conn.execute(text(comm), major=newmname)
                 comm = "update can_has_major set mname =:newmname, level=:newlevel where uid =:uid;"
-                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel)
+                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel,uid=uid)
+        if newPreLoc != '':
+            newcity, newstate, newcountry  = newPreLoc.split(',')
+            comm = "SELECT * FROM location where city=:city"
+            cursor = g.conn.execute(text(comm), city=newcity)
+            l = [] # skill in table skill
+            for result in cursor:
+                l.append(result)
+            if len(l)>0:
+                comm = "update can_expect_loc set city =:city, state =:state, country=:country where uid =:uid;"
+                g.conn.execute(text(comm), uid=uid, city=newcity, state=newstate, country=newcountry)
+            else:
+                comm = "insert into Location (city, state, country) values (:city, :state, :country);"
+                g.conn.execute(text(comm), city=newcity, state=newstate, country=newcountry)
+                comm = "update can_expect_loc set city =:city, state =:state, country=:country where uid =:uid;"
+                g.conn.execute(text(comm), uid=uid, city=newcity, state=newstate, country=newcountry)
+
 
 
         
