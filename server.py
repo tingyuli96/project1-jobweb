@@ -1071,7 +1071,7 @@ class updateClass_can(FlaskForm):
 
 class delete_can_class(FlaskForm):
     """add company to database"""
-    uid = IntegerField('uid',validators=[InputRequired()])
+    uid = IntegerField('please enter your uid to make sure the delete action',validators=[InputRequired()])
 # @app.route('/editjob/<cid>/<title>')
 # @login_required_com
 # def editjob(cid,title):
