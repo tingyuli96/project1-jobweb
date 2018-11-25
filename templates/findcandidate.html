@@ -38,6 +38,7 @@ Dashboard
       <div class="row">
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <!-- <h1 class="page-header">Welcome, {{name}}</h1> -->
+          <div>
           <form class="form-inline">
             <label class="sr-only" for="inlineFormInput">skill</label>
             <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" id="inlineFormInput" placeholder="skill" name="skill">
@@ -45,46 +46,29 @@ Dashboard
               <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="major" name="major">
             <button type="submit" class="btn btn-primary" formmethod="post">Submit</button>
           </form>
-
-          {% for id in profile %}
-          <h4 class="sub-header">{{ loop.index }}</h4>
+          </div>
           <div class="table-responsive">
+            {% for id in profile %}
+          <h4 class="header">{{ id['name'] }}</h4>
             <table class="table table-striped">
-<!--               <thead>
+              <thead>
                 <tr>
-                  <th>Personal Information</th>
+                  <th><a href="/profile_can/{{id['uid']}}">More</a></th>
                 </tr>
-              </thead> -->
+              </thead>
               <tbody>
                 <tr>
                   <td>uid</td>
                   <td>{{id['uid']}}</td>
                 </tr>
-                <tr>
+<!--                 <tr>
                   <td>name</td>
                   <td>{{id['name']}}</td>
-                </tr>
+                </tr> -->
                 <tr>
                   <td>university</td>
                   <td>{{id['university']}}</td>
                 </tr>
-                <tr><a href="/profile_can/{{id['uid']}}">More</a></tr>
-<!--                 <tr>
-                  <td>skills</td>
-                  <td>{{skill_pro}}</td>
-                </tr>
-                <tr>
-                  <td>major</td>
-                  <td>{{maj}}</td>
-                </tr>
-                <tr>
-                  <td>expected location</td>
-                  <td>{{loc}}</td>
-                </tr>
-                <tr>
-                  <td>applied job</td>
-                  <td>{{job}}</td>
-                </tr> -->
               </tbody>
             </table>
             {% endfor %}

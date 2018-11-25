@@ -342,6 +342,124 @@ def profile_can(uid):
     context = dict(usruid=usruid, uid=uid, name=name,university=university,maj=maj, skill_pro=skill_pro,  loc=loc)
     return render_template('profile_can.html',**context)
 
+@app.route('/findjob', methods=['GET','POST'])
+@login_required_can
+def findjob():
+    usruid = session['uid']
+    cursor = g.conn.execute("SELECT cid,title FROM position_liein_post;")
+    joblist = []
+    for result in cursor:
+        joblist.append(result)
+    print "joblist={}".format(joblist)
+    if request.method == 'POST':
+        findtitle = request.form.get('title')
+        findworktype = request.form.get('worktype')
+        rankbyappddl = request.form.get('appddl')
+        rankbypostdate = request.form.get('postdate')
+        print 'rankbypostdate={}'.format(rankbypostdate)
+        if rankbyappddl != None and rankbypostdate != None:
+            print '-------rankbyappddl----------{}'.format(rankbyappddl)
+            if findtitle != "":
+                newjoblist = []
+                print '-------match by title --------'
+                findtitle = '%' + findtitle + '%'
+                command = "SELECT cid, title FROM position_liein_post WHERE title ilike :findtitle ORDER BY appddl ASC, posttime DESC;"
+                cursor = g.conn.execute(text(command),findtitle=findtitle)
+            else:
+                newjoblist = []
+                command = "SELECT cid, title FROM position_liein_post ORDER BY appddl ASC, posttime DESC;"
+                cursor = g.conn.execute(text(command))
+            for result in cursor:
+                newjoblist.append(result)
+                joblist = newjoblist
+            if findworktype != "":
+                newjoblist = []
+                print '-----worktype------'
+                for job in joblist:
+                    command = "SELECT cid,title FROM position_liein_post WHERE cid=:cid and title = :title and worktype = :findworktype;"
+                    cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'],findworktype=findworktype)
+                    for result in cursor:
+                        newjoblist.append(result)
+                        joblist = newjoblist
+        elif rankbyappddl != None:
+            if findtitle != "":
+                newjoblist = []
+                print '-------match by title --------'
+                findtitle = '%' + findtitle + '%'
+                command = "SELECT cid, title FROM position_liein_post WHERE title ilike :findtitle ORDER BY appddl ASC;"
+                cursor = g.conn.execute(text(command),findtitle=findtitle)
+            else:
+                newjoblist = []
+                command = "SELECT cid, title FROM position_liein_post ORDER BY appddl ASC;"
+                cursor = g.conn.execute(text(command))
+            for result in cursor:
+                newjoblist.append(result)
+                joblist = newjoblist
+            if findworktype != "":
+                newjoblist = []
+                print '-----worktype------'
+                for job in joblist:
+                    command = "SELECT cid,title FROM position_liein_post WHERE cid=:cid and title = :title and worktype = :findworktype;"
+                    cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'],findworktype=findworktype)
+                    for result in cursor:
+                        newjoblist.append(result)
+                        joblist = newjoblist
+        elif rankbypostdate != None:
+            if findtitle != "":
+                newjoblist = []
+                print '-------match by title --------'
+                findtitle = '%' + findtitle + '%'
+                command = "SELECT cid, title FROM position_liein_post WHERE title ilike :findtitle ORDER BY posttime DESC;"
+                cursor = g.conn.execute(text(command),findtitle=findtitle)
+            else:
+                newjoblist = []
+                command = "SELECT cid, title FROM position_liein_post ORDER BY posttime DESC;"
+                cursor = g.conn.execute(text(command))
+            for result in cursor:
+                newjoblist.append(result)
+                joblist = newjoblist
+            if findworktype != "":
+                newjoblist = []
+                print '-----worktype------'
+                for job in joblist:
+                    command = "SELECT cid,title FROM position_liein_post WHERE cid=:cid and title = :title and worktype = :findworktype;"
+                    cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'],findworktype=findworktype)
+                    for result in cursor:
+                        newjoblist.append(result)
+                        joblist = newjoblist
+        else:
+            if findtitle != "":
+                newjoblist = []
+                print '-------match by title --------'
+                findtitle = '%' + findtitle + '%'
+                command = "SELECT cid, title FROM position_liein_post WHERE title ilike :findtitle;"
+                cursor = g.conn.execute(text(command),findtitle=findtitle)
+            # else:
+            #     newjoblist = []
+            #     command = "SELECT cid, title FROM position_liein_post;"
+            #     cursor = g.conn.execute(text(command))
+                for result in cursor:
+                    newjoblist.append(result)
+                    joblist = newjoblist
+            if findworktype != "":
+                newjoblist = []
+                print '-----worktype------'
+                for job in joblist:
+                    command = "SELECT cid,title FROM position_liein_post WHERE cid=:cid and title = :title and worktype = :findworktype;"
+                    cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'],findworktype=findworktype)
+                    for result in cursor:
+                        newjoblist.append(result)
+                        joblist = newjoblist
+    alljoblist = []
+    for job in joblist:
+        command = "SELECT * FROM position_liein_post WHERE cid=:cid and title = :title;"
+        cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
+        for result in cursor:
+            alljoblist.append(result)
+    context = dict(joblist = alljoblist)
+    return render_template('/findjob.html',**context)
+
+
 @app.route('/updateInfo_com', methods=['GET','POST'])
 @login_required_com
 def updateInfo_com():
