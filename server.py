@@ -1127,13 +1127,17 @@ def updateInfo_can():
                 l.append(result)
             #bug here, if the person has no major data in the database
             if len(l)>0:
-                comm = "update can_has_major set mname =:newmname, level=:newlevel where uid =:uid;"
+                comm = "delete from can_has_major where uid =:uid;"
+                g.conn.execute(text(comm), uid=uid)
+                comm = "insert into can_has_major (uid, mname, level) values (:uid, :newmname,:newlevel);"
                 g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel, uid=uid)
             else:
                 comm = "insert into Major (mname) values (:major);"
                 g.conn.execute(text(comm), major=newmname)
-                comm = "update can_has_major set mname =:newmname, level=:newlevel where uid =:uid;"
-                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel,uid=uid)
+                comm = "delete from can_has_major where uid =:uid;"
+                g.conn.execute(text(comm), uid=uid)
+                comm = "insert into can_has_major (uid, mname, level) values (:uid, :newmname,:newlevel);"
+                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel, uid=uid)
         if newPreLoc != '':
             newcity, newstate, newcountry  = newPreLoc.split(',')
             comm = "SELECT * FROM location where city=:city and state=:state and country=:country"
