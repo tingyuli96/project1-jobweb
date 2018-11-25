@@ -1160,12 +1160,16 @@ def updateInfo_can():
             for result in cursor:
                 l.append(result)
             if len(l)>0:
-                comm = "update can_expect_loc set city =:city, state =:state, country=:country where uid =:uid;"
+                comm = "delete from can_expect_loc where uid =:uid;"
+                g.conn.execute(text(comm), uid=uid)
+                comm = "insert into can_expect_loc (uid, city,state,country) values (:uid, :city, :state, :country)"
                 g.conn.execute(text(comm), uid=uid, city=newcity, state=newstate, country=newcountry)
             else:
                 comm = "insert into Location (city, state, country) values (:city, :state, :country);"
                 g.conn.execute(text(comm), city=newcity, state=newstate, country=newcountry)
-                comm = "update can_expect_loc set city =:city, state =:state, country=:country where uid =:uid;"
+                comm = "delete from can_expect_loc where uid =:uid;"
+                g.conn.execute(text(comm), uid=uid)
+                comm = "insert into can_expect_loc (uid, city,state,country) values (:uid, :city, :state, :country)"
                 g.conn.execute(text(comm), uid=uid, city=newcity, state=newstate, country=newcountry)
         if newSkill != '':
             comm = "delete from can_has_skills where uid=:uid;"
