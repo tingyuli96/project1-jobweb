@@ -309,7 +309,7 @@ def findcandidate():
 @app.route('/profile_can/<uid>')
 @login_required_com
 def profile_can(uid):
-    usruid = session['uid']
+    # usruid = session['uid']
     getcandidate = "SELECT * FROM candidate WHERE uid=:uid;"
     cursor = g.conn.execute(text(getcandidate),uid=uid)
     for result in cursor:
@@ -339,7 +339,7 @@ def profile_can(uid):
         loc = loc + result['state'] + ", "
         loc = loc + result['country'] + ", "
     cursor4.close()
-    context = dict(usruid=usruid, uid=uid, name=name,university=university,maj=maj, skill_pro=skill_pro,  loc=loc)
+    context = dict(uid=uid, name=name,university=university,maj=maj, skill_pro=skill_pro,  loc=loc)
     return render_template('profile_can.html',**context)
 
 @app.route('/findjob', methods=['GET','POST'])
@@ -456,7 +456,7 @@ def findjob():
         cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
         for result in cursor:
             alljoblist.append(result)
-    context = dict(joblist = alljoblist)
+    context = dict(usruid=usruid, joblist = alljoblist)
     return render_template('/findjob.html',**context)
 
 
