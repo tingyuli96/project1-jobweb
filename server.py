@@ -863,8 +863,27 @@ def updateInfo_can():
         if newPassword != '':
             comm = "update candidate set password =:newPassword where uid =:uid; "
             g.conn.execute(text(comm), uid=uid, newPassword=newPassword)
+        if newUniversity != '':
+            comm = "update candidate set university =:newUniversity where uid =:uid; "
+            g.conn.execute(text(comm), uid=uid, newUniversity=newUniversity)
+        if newMajor != '':
+            newmname, newlevel = newMajor.split('.') 
+            comm = "SELECT * FROM major where mname=:mname"
+            cursor = g.conn.execute(comm, mname=newmname)
+            l = [] # skill in table skill
+            for result in cursor:
+                l.append(result)
+            if len(l)>0:
+                comm = "update can_has_major set mname =:newmname, level=:newlevel where uid =:uid;"
+                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel)
+            else:
+                comm = "insert into Major (mname) values (:major);"
+                g.conn.execute(text(comm), major=newmname)
+                comm = "update can_has_major set mname =:newmname, level=:newlevel where uid =:uid;"
+                g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel)
 
 
+        
 
         # if not flag:
         #     g.conn.execute(text(newcandidate), uid = newuid, name = newname,\
