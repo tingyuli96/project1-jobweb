@@ -1098,6 +1098,16 @@ def updateInfo_can():
         #     return render_template('/updateinfo_can.html', form=form, notvaliduser = True)
     return render_template('/updateinfo_can.html', form=form, notvaliduser = False)
 
+
+
+
+@app.route('/deleteAppliedJob/<cid>/<title>', methods=['GET', 'POST'])
+@login_required_can
+def deleteAppliedJob(cid,tilte):
+    uid = session['uid']
+    comm = "delete from can_apply_pos where uid =:uid and cid=:cid and title=:title;"
+    g.conn.execute(text(comm), uid=uid, cid=cid, title=title)
+
 """
 if __name__ == '__main__':
     app.run(debug=True)
