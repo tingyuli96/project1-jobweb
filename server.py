@@ -493,6 +493,22 @@ def job_overview(cid,title):
     context = dict(recruiter = recruiter, cid=cid,cname=cname,size=size,description=description, position = position, skills = skills, majors = majors)
     return render_template('job_overview.html',**context)
 
+@app.route('/applyjob/<cid>/<title>')
+@login_required_can
+def applyjob(cid,title):
+    uid = session['uid']
+    command = "SELECT cid, title FROM can_apply_pos WHERE uid = :uid;"
+    cursor = g.conn.execute(text(command),uid=uid)
+    appliedjob = []
+    for result in cursor:
+        appliedjob.append('result')
+    if (cid,title) not in appliedjob:
+        print '-------add apply ------'
+        applytime = str(date.today())
+        command = "INSERT INTO can_apply_pos VALUES (:uid,:title,:cid,:applytime);"
+        cursor = g.conn.execute(text(command),uid=uid,title=title,cid=cid,applytime=applytime)
+    return redirect(url_for('findjob'))
+
 @app.route('/updateInfo_com', methods=['GET','POST'])
 @login_required_com
 def updateInfo_com():
