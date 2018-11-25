@@ -204,7 +204,7 @@ def dashboard_can():
     cursor2.close()
 
     
-    can_job = "select can_apply_pos.title, company.cname from can_apply_pos inner join company on can_apply_pos.cid = company.cid where can_apply_pos.uid = :uid;"
+    can_job = "select can_apply_pos.title, can_apply_pos.applytime, company.cname from can_apply_pos inner join company on can_apply_pos.cid = company.cid where can_apply_pos.uid = :uid;"
     cursor3 = g.conn.execute(text(can_job),uid=uid)
     # job = ''
     # for result in cursor3:

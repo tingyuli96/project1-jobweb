@@ -127,14 +127,17 @@ Dashboard
                   <th>#</th>
                   <th>Company</th>
                   <th>Job title</th>
+                  <th>Applied Time</th>
                 </tr>
               </thead>
               <tbody>
                 {% for job in jobs %}
                 <tr>
                   <td>{{loop.index}}</td>
-                  <td>{{job['cname']}}
+                  <td>{{job['cname']}}</td>
                   <td>{{job['title']}}</td>
+                  <td>{{job['applytime']}}</td>
+                  <td><a href="/editjob/{{cid}}/{{job['title']}}" class="btn btn-default">Edit</a></td>
                 </tr>
                 {% endfor %}
                 
