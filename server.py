@@ -253,6 +253,20 @@ def dashboard_com(uid):
     context = dict(uid=uid, name=name,cid=cid,cname=cname,size=size,description=description,jobs=jobs)
     return render_template('dashboard_com.html',**context)
 
+@app.route('/showappliedcan/<cid>/<title>')
+@login_required_com
+def showappliedcan(cid,title):
+    usruid = session['uid']
+    command = "SELECT T2.uid as uid, T2.name as name, T2.university as university \
+                from can_apply_pos as T1 ,candidate as T2 \
+                WHERE T1.uid = T2.uid and T1.cid=:cid and T1.title = :title;"
+    cursor = g.conn.execute(text(command),cid=cid,title=title)
+    profile = []
+    for result in cursor:
+        profile.append(result)
+    context = dict(usruid=usruid, cid=cid,title=title,profile=profile)
+    return render_template('showappliedcan.html',**context)
+
 @app.route('/findcandidate', methods = ['GET','POST'])
 @login_required_com
 def findcandidate():

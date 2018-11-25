@@ -1,0 +1,70 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Get Hired</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/dashboard_com/{{usruid}}">Dashboard</a></li>
+            <li><a href="/findcandidate">Find Candidate</a></li>
+            <li><a href="{{ url_for('logout')}}">Log Out</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">{{ title }}</h1>
+          <div class="table-responsive">
+            {% for id in profile %}
+          <h4 class="header">{{ id['name'] }}</h4>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th><a href="/profile_can/{{id['uid']}}">More</a></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>uid</td>
+                  <td>{{id['uid']}}</td>
+                </tr>
+<!--                 <tr>
+                  <td>name</td>
+                  <td>{{id['name']}}</td>
+                </tr> -->
+                <tr>
+                  <td>university</td>
+                  <td>{{id['university']}}</td>
+                </tr>
+              </tbody>
+            </table>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
