@@ -1052,8 +1052,8 @@ def updateInfo_can():
                 g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel,uid=uid)
         if newPreLoc != '':
             newcity, newstate, newcountry  = newPreLoc.split(',')
-            comm = "SELECT * FROM location where city=:city"
-            cursor = g.conn.execute(text(comm), city=newcity)
+            comm = "SELECT * FROM location where city=:city and state=:state and country=:country"
+            cursor = g.conn.execute(text(comm), city=newcity, state=newstate, country=newcountry)
             l = [] # skill in table skill
             for result in cursor:
                 l.append(result)
