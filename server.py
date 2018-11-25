@@ -459,6 +459,55 @@ def findjob():
     context = dict(usruid=usruid, joblist = alljoblist)
     return render_template('/findjob.html',**context)
 
+@app.route('/job_overview/<cid>/<title>')
+@login_required_can
+def job_overview(cid,title):
+    command = "SELECT * from company WHERE cid = :cid;"
+    cursor2 = g.conn.execute(text(command),cid=cid)
+    sizedic=dict([('1','1-10'),('2','10-50'),('3','50-100'),('4','100-250'),('5','250-1000'),('6','1000-5000'),('7','5000-10000'),('8','10000-25000'),('9','25000+')])
+    for result in cursor2:
+        cname = result['cname']
+        size = sizedic[str(result['size'])]
+        description = result['description']
+    cursor2.close()
+    command = "SELECT * FROM position_liein_post where cid = :cid and title = :title;"
+    cursor = g.conn.execute(text(command),cid=cid,title=title)
+    for result in cursor:
+        position = result
+    cursor.close()
+    command = "SELECT * FROM pos_require_skills where cid = :cid and title = :title;"
+    cursor = g.conn.execute(text(command), cid=cid,title=title)
+    skills = []
+    for result in cursor:
+        skills.append(result)
+    cursor.close()
+    command = "SELECT * FROM pos_expect_major where cid = :cid and title = :title"
+    cursor = g.conn.execute(text(command),cid=cid,title=title)
+    majors = []
+    for result in cursor:
+        majors.append(result)
+    command = "SELECT * FROM companyusers_affi WHERE uid = :uid;"
+    cursor = g.conn.execute(text(command),uid=position['uid'])
+    for result in cursor:
+        recruiter = result
+    context = dict(recruiter = recruiter, cid=cid,cname=cname,size=size,description=description, position = position, skills = skills, majors = majors)
+    return render_template('job_overview.html',**context)
+
+@app.route('/applyjob/<cid>/<title>')
+@login_required_can
+def applyjob(cid,title):
+    uid = session['uid']
+    command = "SELECT cid, title FROM can_apply_pos WHERE uid = :uid;"
+    cursor = g.conn.execute(text(command),uid=uid)
+    appliedjob = []
+    for result in cursor:
+        appliedjob.append('result')
+    if (cid,title) not in appliedjob:
+        print '-------add apply ------'
+        applytime = str(date.today())
+        command = "INSERT INTO can_apply_pos VALUES (:uid,:title,:cid,:applytime);"
+        cursor = g.conn.execute(text(command),uid=uid,title=title,cid=cid,applytime=applytime)
+    return redirect(url_for('findjob'))
 
 @app.route('/updateInfo_com', methods=['GET','POST'])
 @login_required_com
