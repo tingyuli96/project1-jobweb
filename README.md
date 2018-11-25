@@ -22,7 +22,7 @@ git clone https://github.com/colirain/project1-jobweb.git
 ```
 4. install dependencies
 ```
-pip -r requirements.txt
+pip install --requirements requirements.txt
 ```
 5. exit environment
 ```
