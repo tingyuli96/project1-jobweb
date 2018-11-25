@@ -252,6 +252,95 @@ def dashboard_com(uid):
     context = dict(uid=uid, name=name,cid=cid,cname=cname,size=size,description=description,jobs=jobs)
     return render_template('dashboard_com.html',**context)
 
+@app.route('/findcandidate', methods = ['GET','POST'])
+@login_required_com
+def findcandidate():
+    usruid = session['uid']
+    uid = Set()
+    cursor = g.conn.execute("SELECT uid FROM candidate;")
+    for result in cursor:
+        uid.add(result['uid'])
+    #     university.append(result['university'])
+    # majors = []
+    # cursor = g.conn.execute("SELECT mname FROM majors;")
+    # for result in cursor:
+    #     majors.append(result['mname'])
+    if request.method == 'POST':
+        uid_s = Set() #skills
+        uid_m = Set() #major
+        # uid_u = Set() #university
+        findsname = request.form.get('skill')
+        findmname = request.form.get('major')
+        if findsname != "":
+            print '------start match--------'
+            findsname = '%'+findsname+'%'
+            print 'findsname:{}'.format(findsname)
+            command = "SELECT uid from can_has_skills WHERE sname ilike :sname;"
+            cursor = g.conn.execute(text(command),sname = findsname)
+            for result in cursor:
+                uid_s.add(result['uid'])
+        else:
+            uid_s = uid.copy()
+        if findmname != "":
+            print '------start match--------'
+            findmname = '%'+findmname+'%'
+            print 'findmname:{}'.format(findmname)
+            command = "SELECT uid from can_has_major WHERE mname ilike :mname;"
+            cursor = g.conn.execute(text(command),mname=findmname)
+            for result in cursor:
+                uid_m.add(result['uid'])
+        else:
+            uid_m = uid.copy()
+        uid = uid_m & uid_s
+        print 'uid:{}'.format(uid)
+        # return redirect(url_for('findcandidate',uid=uid))
+    print 'uid:{}'.format(uid)
+    command = "SELECT uid, name, university from candidate where uid = :uid"
+    profile = []
+    for id in uid:
+        cursor = g.conn.execute(text(command),uid=id)
+        for result in cursor:
+            profile.append(result)
+    print "profile={}".format(profile)
+    context = dict(usruid = usruid, profile=profile)
+    return render_template('/findcandidate.html',**context)
+
+@app.route('/profile_can/<uid>')
+@login_required_com
+def profile_can(uid):
+    usruid = session['uid']
+    getcandidate = "SELECT * FROM candidate WHERE uid=:uid;"
+    cursor = g.conn.execute(text(getcandidate),uid=uid)
+    for result in cursor:
+        name = result['name']
+        university = result['university']
+    cursor.close()
+    getSkill = "SELECT sname, proficiency FROM can_has_skills WHERE uid=:uid;"
+    cursor1 = g.conn.execute(text(getSkill),uid=uid)
+    skill_pro = ''
+    for result in cursor1:
+        skill_pro = skill_pro + result['sname']+": "
+        skill_pro = skill_pro + str(result['proficiency']) + ";\n"
+    cursor1.close()
+
+    getMajor = "SELECT * FROM can_has_major WHERE uid=:uid;"
+    cursor2 = g.conn.execute(text(getMajor),uid=uid)
+    maj = ''
+    for result in cursor2:
+        maj = maj + result['mname']+": "
+        maj = maj + result['level'] + "; "
+    cursor2.close()
+    comm = "select * from can_expect_loc where uid = :uid;"
+    cursor4 = g.conn.execute(text(comm),uid=uid)
+    loc = ''
+    for result in cursor4:
+        loc = loc + result['city']+", "
+        loc = loc + result['state'] + ", "
+        loc = loc + result['country'] + ", "
+    cursor4.close()
+    context = dict(usruid=usruid, uid=uid, name=name,university=university,maj=maj, skill_pro=skill_pro,  loc=loc)
+    return render_template('profile_can.html',**context)
+
 @app.route('/updateInfo_com', methods=['GET','POST'])
 @login_required_com
 def updateInfo_com():
