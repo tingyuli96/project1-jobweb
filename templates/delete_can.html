@@ -40,40 +40,24 @@ Dashboard
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
             <li><a href="{{ url_for('dashboard_can') }}">Overview <span class="sr-only">(current)</span></a></li>
-            <li class="active"><a href="{{ url_for('updateInfo_can') }}">Edit Personal Information</a></li>
-            <li><a href="#">Delete User</a></li>
+            <li><a href="{{ url_for('updateInfo_can') }}">Edit Personal Information</a></li>
+            <li class="active"><a href="{{ url_for('delete_can') }}">Delete User</a></li>
           </ul>
-          <!-- <ul class="nav nav-sidebar">
-            <li><a href="">Nav item</a></li>
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-            <li><a href="">More navigation</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-          </ul> -->
         </div>
       </div>
     </div>
 
     <div class="container">
 
-      <form class="form-signin" method='POST' action="/updateInfo_can">
-        <h2 class="form-signin-heading">Update Information Candidate</h2>
+      <form class="form-signin" method='POST' action="/delete_can">
+        <h2 class="form-signin-heading">Delete User</h2>
         {{ form.hidden_tag() }}
         {% if notvaliduid %}
         <p>uid already used</p>
         {% endif %}
-        {{ wtf.form_field(form.password) }}
-        {{ wtf.form_field(form.university) }}
-        {{ wtf.form_field(form.major) }}
-        {{ wtf.form_field(form.preLoc) }}
-        {{ wtf.form_field(form.skill) }}
+        {{ wtf.form_field(form.uid) }}
 
-        <button class="btn btn-lg btn-primary btn-block" type="submit">update</button>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">delete</button>
       </form>
 
     </div>
