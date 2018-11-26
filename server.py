@@ -574,33 +574,56 @@ def deleteuser_com():
     cursor = g.conn.execute(text(command),uid=uid)
     for result in cursor:
         cid = result['cid']
-        if request.method == 'POST':
-            deletuid = request.form.get('uid')
-            if deletuid == uid:
-                session.pop('uid', None)
+    command = "SELECT C1.uid as uid FROM companyusers_affi as C1, companyusers_affi as C2 WHERE C1.uid != C2.uid and C1.cid = C2.cid and C2.cid = :cid"
+    cursor = g.conn.execute(text(command),cid=cid)
+    colleague = Set()
+    print 'colleague={}'.format(colleague)
+    for result in cursor:
+        colleague.add(result['uid'])
+    if request.method == 'POST':
+        deleteuid = request.form.get('uid')
+        colleagueuid =  request.form.get('colleagueuid')
+        print "deleteuid:{}".format(deleteuid)
+        print "uid in session:{}".format(uid)
+        if deleteuid == uid:
+            print ('make sure delete')
+            session.pop('uid', None)
+            print 'colleagueuid={}'.format(colleagueuid)
+            if colleagueuid != None:
+                print 'transfer to colleague{}'.format(colleagueuid)
+                #
+                command = "UPDATE position_liein_post SET uid = :colleague_uid WHERE uid=:deletusr_uid;"
+                cursor = g.conn.execute(text(command),colleague_uid=colleagueuid,deletusr_uid=uid)
+            else:
+                # print 'colleague={}'.format(colleague)
+                print ("start delete all")
                 command = "SELECT cid, title FROM position_liein_post WHERE uid=:uid;"
                 cursor = g.conn.execute(text(command),uid=uid)
                 joblist = []
                 for result in cursor:
                     joblist.append(result)
                 for job in joblist:
+                    command = "DELETE FROM can_apply_pos WHERE cid=:cid and title = :title;"
+                    cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
                     command = "DELETE FROM pos_require_skills WHERE cid=:cid and title=:title;"
                     cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
                     command = "DELETE FROM pos_expect_major WHERE cid=:cid and title=:title;"
                     cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
                 command = "DELETE FROM position_liein_post WHERE uid=:uid;"
                 cursor = g.conn.execute(text(command),uid=uid)
-                command = "DELETE FROM companyusers_affi WHERE uid=:uid;"
-                cursor = g.conn.execute(text(command),uid=uid)
-                return redirect('/')
-            else:
-                return render_template('/deleteuser_com.html',uid=uid,cid=cid,uiderror=True)
-    return render_template('/deleteuser_com.html',uid=uid,cid=cid,uiderror=False)
+            command = "DELETE FROM companyusers_affi WHERE uid=:uid;"
+            cursor = g.conn.execute(text(command),uid=uid)
+            return redirect('/')
+        else:
+            return render_template('/deleteuser_com.html',uid=uid,cid=cid,uiderror=True)
+    return render_template('/deleteuser_com.html',uid=uid,cid=cid,colleague = colleague, uiderror=False)
 
 @app.route('/deletejob/<cid>/<title>')
 @login_required_com
 def deletejob(cid,title):
     uid = session['uid']
+    command = "DELETE FROM can_apply_pos WHERE cid=:cid and title = :title;"
+    cursor = g.conn.execute(text(command),cid=cid, title = title)
     command = "DELETE FROM pos_require_skills WHERE cid=:cid and title=:title;"
     cursor = g.conn.execute(text(command),cid=cid,title=title)
     command = "DELETE FROM pos_expect_major WHERE cid=:cid and title=:title;"

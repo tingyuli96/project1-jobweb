@@ -52,6 +52,13 @@ Dashboard
         {% if uiderror %}
         <p>not your uid</p>
         {% endif %}
+        <label for="colleague">Please choose the uid of your colleague. The positions you posted will be transfered to your colleague. If you don't have any colleague, all the positions will be deleted.</label>
+        <select class="form-control" id="colleague" name="colleagueuid" autofocus>
+              <option disabled selected value>--colleague--</option>
+              {% for i in colleague %}
+              <option value="{{i}}">{{i}}</option>
+              {% endfor %}
+        </select>
         <label for="uid">please enter your uid to make sure the delete action</label>
         <input type="text" id="uid" class="form-control" placeholder="uid" name="uid" required autofocus>
 
