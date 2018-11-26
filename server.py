@@ -574,12 +574,12 @@ def deleteuser_com():
     cursor = g.conn.execute(text(command),uid=uid)
     for result in cursor:
         cid = result['cid']
-    command = "SELECT C1.uid as uid FROM companyusers_affi as C1, companyusers_affi as C2 WHERE C1.uid != C2.uid and C1.cid = C2.cid and C2.cid = :cid"
-    cursor = g.conn.execute(text(command),cid=cid)
+    command = "SELECT C1.uid as uid FROM companyusers_affi as C1, companyusers_affi as C2 WHERE C1.uid != C2.uid and C1.cid = C2.cid and C2.uid = :uid"
+    cursor = g.conn.execute(text(command),uid=uid)
     colleague = Set()
-    print 'colleague={}'.format(colleague)
     for result in cursor:
         colleague.add(result['uid'])
+    print 'colleague={}'.format(colleague)
     if request.method == 'POST':
         deleteuid = request.form.get('uid')
         colleagueuid =  request.form.get('colleagueuid')
