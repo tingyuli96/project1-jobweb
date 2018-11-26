@@ -1085,7 +1085,7 @@ class updateClass_can(FlaskForm):
     university = StringField('university')
     major = StringField('major(eg: Computer Science)')
     majorLevel = SelectField('major level, please input your major at the same time',choices=[('Bachelor','Bachelor'),('Master','Master'),('PHD','PHD')])
-    skill = StringField('skill(skill name,proficiency level(number 1-5, 5 means expert); no space, eg: Java,3;Python,5;)')
+    skill = StringField('skill(skill name,proficiency level(number 1-5, 5 means expert); no space, eg: Java,3;Python,5)')
     preLoc = StringField('prefered location(city,state,country, nospace, eg: New York,NY,US)')
 
 
@@ -1128,12 +1128,27 @@ def checkLoc(loc):
         return False
     return True
 
-def checkSkill(loc):
-    if ';' not in loc:
-        return False
-    locList = loc.split(';')
-    if len(locList) != 3:
-        return False
+def checkSkill(skills):
+    numList = [ str(i) for i in range(1,6)]
+    if ';' not in skills:
+        if ',' not in skills:
+            return False
+        else:
+            oneSkill = skills.split(',')
+            if len(oneSkill) != 2:
+                return False
+            if oneSkill[1] not in numList:
+                return False 
+            return True
+    sList = skills.split(';')
+    for skill in sList:
+        if ',' not in skill:
+            return False
+        sList2 = skill.split(',')
+        if len(sList2) != 2:
+            return False
+        if sList2[1] not in numList:
+            return False
     return True
 
 
@@ -1200,7 +1215,7 @@ def updateInfo_can():
                 g.conn.execute(text(comm), uid=uid)
                 comm = "insert into can_expect_loc (uid, city,state,country) values (:uid, :city, :state, :country)"
                 g.conn.execute(text(comm), uid=uid, city=newcity, state=newstate, country=newcountry)
-        if newSkill != '':
+        if newSkill != '' and checkSkill(newSkill) == True:
             comm = "delete from can_has_skills where uid=:uid;"
             g.conn.execute(text(comm), uid=uid)
             sList = newSkill.split(';')
