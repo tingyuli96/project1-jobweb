@@ -36,9 +36,10 @@ Dashboard
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li><a href="{{ url_for('dashboard_can') }}">Overview <span class="sr-only">(current)</span></a></li>
-            <li><a href="{{ url_for('updateInfo_can') }}">Edit Personal Information</a></li>
-            <li class="active"><a href="{{ url_for('delete_can') }}">Delete User</a></li>
+            <li><a href="/dashboard_com/{{uid}}">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="/updateInfo_com">Edit Profile</a></li>
+            <li><a href="/editcompany/{{cid}}">Edit Company</a></li>
+            <li class="active"><a href="/deleteuser_com">Delete User</a></li>
           </ul>
         </div>
       </div>
@@ -46,13 +47,13 @@ Dashboard
 
     <div class="container">
 
-      <form class="form-signin" method='POST' action="/delete_can">
+      <form class="form-signin" method='POST' action="/deleteuser_com">
         <h2 class="form-signin-heading">Delete User</h2>
-        {{ form.hidden_tag() }}
-        {% if notvaliduid %}
-        <p>uid already used</p>
+        {% if uiderror %}
+        <p>not your uid</p>
         {% endif %}
-        {{ wtf.form_field(form.uid) }}
+        <label for="uid">please enter your uid to make sure the delete action</label>
+        <input type="text" id="uid" class="form-control" placeholder="uid" name="uid" required autofocus>
 
         <button class="btn btn-lg btn-primary btn-block" type="submit">delete</button>
       </form>

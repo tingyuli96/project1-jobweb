@@ -76,14 +76,14 @@ def login_required_com(f):
 
 class RegisterFormCandidate(FlaskForm):
     """candidate register"""
-    uid = IntegerField('uid',validators=[InputRequired()])
+    uid = IntegerField('uid (any number you like)',validators=[InputRequired()])
     username = StringField('username',validators=[InputRequired()])
     password = PasswordField('password',validators=[InputRequired()])
     university = StringField('university')
 
 class RegisterFormCompany(FlaskForm):
     """company user register"""
-    uid = IntegerField('uid',validators=[InputRequired()])
+    uid = IntegerField('uid (any number you like)',validators=[InputRequired()])
     username = StringField('username', validators=[InputRequired()])
     password = PasswordField('password', validators=[InputRequired()])
     cid = IntegerField('cid', validators=[InputRequired()])
@@ -566,26 +566,36 @@ def editcompany(cid):
         return redirect(url_for('dashboard_com',uid=uid))
     return render_template('/editcompany.html',uid=uid, cid=cid, form=form)
 
-@app.route('/deleteuser_com')
+@app.route('/deleteuser_com',methods=['GET','POST'])
 @login_required_com
 def deleteuser_com():
     uid = session['uid']
-    session.pop('uid', None)
-    command = "SELECT cid, title FROM position_liein_post WHERE uid=:uid;"
+    command = "SELECT cid FROM companyusers_affi WHERE uid = :uid"
     cursor = g.conn.execute(text(command),uid=uid)
-    joblist = []
     for result in cursor:
-        joblist.append(result)
-    for job in joblist:
-        command = "DELETE FROM pos_require_skills WHERE cid=:cid and title=:title;"
-        cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
-        command = "DELETE FROM pos_expect_major WHERE cid=:cid and title=:title;"
-        cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
-    command = "DELETE FROM position_liein_post WHERE uid=:uid;"
-    cursor = g.conn.execute(text(command),uid=uid)
-    command = "DELETE FROM companyusers_affi WHERE uid=:uid;"
-    cursor = g.conn.execute(text(command),uid=uid)
-    return redirect('/')
+        cid = result['cid']
+        if request.method == 'POST':
+            deletuid = request.form.get('uid')
+            if deletuid == uid:
+                session.pop('uid', None)
+                command = "SELECT cid, title FROM position_liein_post WHERE uid=:uid;"
+                cursor = g.conn.execute(text(command),uid=uid)
+                joblist = []
+                for result in cursor:
+                    joblist.append(result)
+                for job in joblist:
+                    command = "DELETE FROM pos_require_skills WHERE cid=:cid and title=:title;"
+                    cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
+                    command = "DELETE FROM pos_expect_major WHERE cid=:cid and title=:title;"
+                    cursor = g.conn.execute(text(command),cid=job['cid'],title=job['title'])
+                command = "DELETE FROM position_liein_post WHERE uid=:uid;"
+                cursor = g.conn.execute(text(command),uid=uid)
+                command = "DELETE FROM companyusers_affi WHERE uid=:uid;"
+                cursor = g.conn.execute(text(command),uid=uid)
+                return redirect('/')
+            else:
+                return render_template('/deleteuser_com.html',uid=uid,cid=cid,uiderror=True)
+    return render_template('/deleteuser_com.html',uid=uid,cid=cid,uiderror=False)
 
 @app.route('/deletejob/<cid>/<title>')
 @login_required_com
