@@ -1085,7 +1085,7 @@ class updateClass_can(FlaskForm):
     university = StringField('university')
     major = StringField('major(eg: Computer Science)')
     majorLevel = SelectField('major level, please input your major at the same time',choices=[('Bachelor','Bachelor'),('Master','Master'),('PHD','PHD')])
-    skill = StringField('skill(skill name,proficiency level(number 1-5, 5 means expert); no space, eg: Java,3;Python,5)')
+    skill = StringField('skill(skill name,proficiency level(number 1-5, 5 means expert); no space, eg: Java,3;Python,5;)')
     preLoc = StringField('prefered location(city,state,country, nospace, eg: New York,NY,US)')
 
 
@@ -1119,9 +1119,29 @@ def delete_can():
             return redirect("/")
     return render_template('/delete_can.html', form=form, notvaliduser = False)
 
+
+def checkLoc(loc):
+    if ',' not in loc:
+        return False
+    locList = loc.split(',')
+    if len(locList) != 3:
+        return False
+    return True
+
+def checkSkill(loc):
+    if ';' not in loc:
+        return False
+    locList = loc.split(';')
+    if len(locList) != 3:
+        return False
+    return True
+
+
+
 @app.route('/updateInfo_can', methods=['GET', 'POST'])
 @login_required_can
 def updateInfo_can():
+
     form = updateClass_can()
     #print 'uid:{}'.format(form.uid.data)
     uid = session['uid']
@@ -1161,7 +1181,7 @@ def updateInfo_can():
                 g.conn.execute(text(comm), uid=uid)
                 comm = "insert into can_has_major (uid, mname, level) values (:uid, :newmname,:newlevel);"
                 g.conn.execute(text(comm), newmname=newmname, newlevel=newlevel, uid=uid)
-        if newPreLoc != '':
+        if newPreLoc != '' and checkLoc(newPreLoc)==True:
             newcity, newstate, newcountry  = newPreLoc.split(',')
             comm = "SELECT * FROM location where city=:city and state=:state and country=:country"
             cursor = g.conn.execute(text(comm), city=newcity, state=newstate, country=newcountry)
@@ -1200,7 +1220,7 @@ def updateInfo_can():
                     comm = "insert into Can_Has_Skills (uid, sname, proficiency) values (:uid, :sname, :pro);"
                     g.conn.execute(text(comm), uid=uid, sname=s, pro=p)
 
-    return render_template('/updateinfo_can.html', form=form, notvaliduser = False)
+    return render_template('/updateinfo_can.html',form=form, notvalidcid=False)
 
 
 
