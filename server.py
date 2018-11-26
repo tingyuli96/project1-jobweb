@@ -1235,7 +1235,7 @@ def updateInfo_can():
                     comm = "insert into Can_Has_Skills (uid, sname, proficiency) values (:uid, :sname, :pro);"
                     g.conn.execute(text(comm), uid=uid, sname=s, pro=p)
 
-    return render_template('/updateinfo_can.html',form=form, notvalidcid=False)
+    return render_template('/updateInfo_can.html',form=form, notvalidcid=False)
 
 
 
