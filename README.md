@@ -8,7 +8,7 @@ The database we are planning to build is a job hunting platform. The clients are
 - Both candidates and companies can search by set the filters from the entity set, and rank the results by preference like relevant or date post. 
 
 ## E-R diagram
-![E-R diagram](https://github.com/colirain/project1-jobweb/ERdiagram/Project1-v3.png)
+![E-R diagram](https://github.com/colirain/project1-jobweb/blob/master/ERdiagram/Project1-v3.png)
 
 ## Install
 ### Requirement
