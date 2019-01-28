@@ -1,3 +1,12 @@
+# Get Hired
+This is a design of a job hunting website.
+The database we are planning to build is a job hunting platform. The clients are the companies who post open jobs and candidates who are looking for new jobs. The companies can search for the target candidates and send them invitations, and also they can receive applications from candidates.
+
+## main feature
+- Candidates can create his/her own profile, which includes unique id, name, and also connects to skills set, major,  ideal locations.  
+- Company also have their own profiles with cid, name, size, description, and company users are affiliated to exactly one company.
+- Both candidates and companies can search by set the filters from the entity set, and rank the results by preference like relevant or date post. 
+
 ## Install
 ### Requirement
 python2.7 
@@ -27,29 +36,4 @@ pip install --requirements requirements.txt
 ```
 deactivate
 ```
-
-## Old instruct
-Install pip if needed
-
-        sudo apt-get install python-pip
-
-Install libraries
-
-        pip install click flask sqlalchemy
-
-
-Edit `server.py` to set your database URI
-
-        DATABASEURI = "<your database uri>"
-
-
-Run it in the shell
-
-
-        python server.py
-
-Get help:
-
-        python server.py --help
-
-      
+     
